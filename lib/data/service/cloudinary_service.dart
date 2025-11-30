@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'dart:io';
+import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart' as dio;
 import 'package:get/get.dart';
 import 'package:whats_app/utiles/const/Apis.dart';
@@ -32,28 +34,28 @@ class cloudinaryServices extends GetxController {
   }
 
   // Delete picture form cloudinary
-  // Future<dio.Response> deleteImage(String publicId) async {
-  //   try {
-  //     String api = MyApiUrls.deleteApi(MyKeys.cloudName);
+  Future<dio.Response> deleteImage(String publicId) async {
+    try {
+      String api = MyApiUrls.deleteApi(MyKeys.cloudName);
 
-  //     int timestamp = (DateTime.now().millisecondsSinceEpoch / 1000).round();
+      int timestamp = (DateTime.now().millisecondsSinceEpoch / 1000).round();
 
-  //     String signatureBase =
-  //         'public_id=$publicId&timestamp=$timestamp${MyKeys.apiSecret}';
-  //     String signature = sha1.convert(utf8.encode(signatureBase)).toString();
+      String signatureBase =
+          'public_id=$publicId&timestamp=$timestamp${MyKeys.apiSecret}';
+      String signature = sha1.convert(utf8.encode(signatureBase)).toString();
 
-  //     final formData = dio.FormData.fromMap({
-  //       'public_id': publicId,
-  //       'api_key': MyKeys.apiKey,
-  //       'timestamp': timestamp,
-  //       'signature': signature,
-  //     });
+      final formData = dio.FormData.fromMap({
+        'public_id': publicId,
+        'api_key': MyKeys.apiKey,
+        'timestamp': timestamp,
+        'signature': signature,
+      });
 
-  //     dio.Response response = await _dio.post(api, data: formData);
+      dio.Response response = await _dio.post(api, data: formData);
 
-  //     return response;
-  //   } catch (e) {
-  //     throw 'Something went wrong. Please try again';
-  //   }
-  // }
+      return response;
+    } catch (e) {
+      throw 'Something went wrong. Please try again';
+    }
+  }
 }

@@ -9,6 +9,7 @@ import 'package:whats_app/utiles/theme/const/colors.dart';
 import 'package:whats_app/utiles/theme/const/sizes.dart';
 import 'package:whats_app/utiles/theme/const/text.dart';
 import 'package:whats_app/utiles/theme/helpers/helper_function.dart';
+import 'package:whats_app/utiles/validation/Validations.dart';
 
 class verify_screen extends StatelessWidget {
   const verify_screen({super.key});
@@ -36,14 +37,21 @@ class verify_screen extends StatelessWidget {
     );
 
     return Scaffold(
-      floatingActionButton: Container(
-        // margin: EdgeInsets.only(bottom: Mysize.iconLg),
-        child: MyElevatedButton(
-          onPressed: () {
-            controller.verifyWithOtp();
-          },
-          text: "Verify",
-        ),
+      floatingActionButton: MyElevatedButton(
+        onPressed: () {
+          final otp = controller.otpController.text.trim();
+
+          if (otp.isEmpty) {
+            Get.snackbar(
+              'Invalid OTP',
+              "OTP can't be empty",
+              snackPosition: SnackPosition.TOP,
+            );
+            return;
+          }
+          controller.verifyWithOtp();
+        },
+        text: "Verify",
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
 
@@ -91,8 +99,10 @@ class verify_screen extends StatelessWidget {
 
                 // verify code input box
                 Pinput(
+                  key: controller.OTPkey,
                   length: 6,
                   controller: controller.otpController,
+
                   defaultPinTheme: defaultPinTheme,
                   focusedPinTheme: defaultPinTheme.copyWith(
                     decoration: BoxDecoration(

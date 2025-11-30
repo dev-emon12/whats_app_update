@@ -54,16 +54,14 @@ class UserRepository extends GetxController {
   }
 
   //  // Delete profile picture form cloudinary
-  // Future<dio.Response> deleteProfilePicture(String publicId) async {
-  //   try {
-
-  //     dio.Response response = await _coludnaryServcies.deleteImage(publicId);
-  //     return response;
-
-  //   } catch (e) {
-  //     throw "Something went wrong. Please try again";
-  //   }
-  // }
+  Future<dio.Response> deleteProfilePicture(String publicId) async {
+    try {
+      dio.Response response = await _coludnaryServcies.deleteImage(publicId);
+      return response;
+    } catch (e) {
+      throw "Something went wrong. Please try again";
+    }
+  }
 
   // update user details in single field to Db
   Future<void> updateSingleField(Map<String, dynamic> map) async {

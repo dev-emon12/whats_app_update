@@ -14,10 +14,10 @@ class UserProfileLogo extends StatelessWidget {
     return Obx(() {
       final pic = controller.user.value.profilePicture;
 
-      bool isProfileAvailable = pic != null && pic.isNotEmpty;
+      bool isProfileAvailable = pic.isNotEmpty;
 
       return MyCirculerImage(
-        image: isProfileAvailable ? pic! : MyImage.onProfileScreen,
+        image: isProfileAvailable ? pic : MyImage.onProfileScreen,
         height: Mysize.profile_image_height,
         width: Mysize.profile_image_width,
         borderWidth: 5.0,

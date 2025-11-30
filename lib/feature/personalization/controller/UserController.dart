@@ -21,7 +21,7 @@ class UserController extends GetxController {
   // Update user profile picture
   Future<void> updateUserProfilePicture() async {
     try {
-      // pick image from gallery
+      // pick image form gallery
       XFile? image = await ImagePicker().pickImage(
         source: ImageSource.gallery,
         maxHeight: 512,
@@ -29,41 +29,40 @@ class UserController extends GetxController {
       );
       if (image == null) return;
 
+      // convert XFile to file
       File file = File(image.path);
 
-      // upload picture to Cloudinary
+      // delete user current profile picture
+      if (user.value.publicId.isNotEmpty) {
+        await _userRepository.deleteProfilePicture(user.value.publicId);
+      }
+
+      // upload picture to cloudinary
       dio.Response response = await _userRepository.updateProfilePicture(file);
-
       if (response.statusCode == 200) {
-        final data = response.data as Map<String, dynamic>;
-
-        final imageUrl = data["secure_url"] ?? data["url"];
+        final data = response.data;
+        final imageUrl = data["url"];
         final publicId = data["public_id"];
 
-        if (imageUrl == null || imageUrl.isEmpty) {
-          throw "Cloudinary did not return an image url";
-        }
-
-        // Save to Firestore
-        await _userRepository.updateSingleField({
+        // update profile picture from firestore
+        _userRepository.updateSingleField({
           "profilePicture": imageUrl,
           "publicId": publicId,
         });
-        // await _userRepository.debugPrintCurrentUserDoc();
 
-        // Update local RxUser
+        // update profile and public id form RxUser
         user.value.profilePicture = imageUrl;
         user.value.publicId = publicId;
-        // user.refresh();
-
+        user.refresh();
         MySnackBarHelpers.successSnackBar(
           title: "Congratulation",
           message: 'Profile picture update successfully',
         );
       } else {
-        throw "Failed to upload profile picture. Please try again";
+        throw "Failed to upload profile picture.Please try again";
       }
     } catch (e) {
+      MyFullScreenLoader.stopLoading();
       MySnackBarHelpers.errorSnackBar(title: "Failed!", message: e.toString());
     }
   }

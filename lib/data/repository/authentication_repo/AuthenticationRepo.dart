@@ -25,6 +25,9 @@ class AuthenticationRepository extends GetxController {
   TextEditingController otpController = TextEditingController();
   User? get currentUser => _auth.currentUser;
   final LocalStorage = GetStorage();
+  RxBool isPhoneEmpty = true.obs;
+  final signUpKey = GlobalKey<FormState>();
+  final OTPkey = GlobalKey<FormState>();
 
   @override
   void onReady() {
@@ -75,6 +78,13 @@ class AuthenticationRepository extends GetxController {
       //   MySnackBarHelpers.warningSnackBar(title: "No Internet Connection");
       //   return;
       // }
+
+      // form validation
+      if (!signUpKey.currentState!.validate()) {
+        return;
+      }
+
+      // verify number
       await _auth.verifyPhoneNumber(
         phoneNumber: fullPhone.string,
         verificationCompleted: (PhoneAuthCredential credential) {},
@@ -103,6 +113,7 @@ class AuthenticationRepository extends GetxController {
       throw MyPlatformException(e.code).message;
     } catch (e) {
       MyFullScreenLoader.stopLoading();
+      Get.back();
       throw "Something went wrong.Please try again";
     }
   }
@@ -114,6 +125,7 @@ class AuthenticationRepository extends GetxController {
       MyFullScreenLoader.openLoadingDialog(
         "We are processing your information...",
       );
+
       PhoneAuthCredential credential = PhoneAuthProvider.credential(
         verificationId: VerifyId,
         smsCode: otpController.text,

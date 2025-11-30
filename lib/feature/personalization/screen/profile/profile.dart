@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
@@ -7,6 +8,7 @@ import 'package:whats_app/feature/authentication/screens/log_in_screen/widget/Us
 import 'package:whats_app/feature/personalization/controller/UserController.dart';
 import 'package:whats_app/utiles/theme/const/sizes.dart';
 import 'package:whats_app/utiles/theme/const/text.dart';
+import 'package:whats_app/utiles/validation/Validations.dart';
 
 class profile_screen extends StatelessWidget {
   const profile_screen({super.key});
@@ -15,12 +17,22 @@ class profile_screen extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = Get.put(UserController());
     return Scaffold(
-      floatingActionButton: Container(
-        // margin: EdgeInsets.only(bottom: Mysize.iconLg),
-        child: MyElevatedButton(
-          onPressed: controller.saveUserRecord,
-          text: "Next",
-        ),
+      floatingActionButton: MyElevatedButton(
+        onPressed: () {
+          final username = controller.userName.text.trim();
+          final photo =
+              UserController.instance.user.value.profilePicture.isEmpty;
+          if (username.isEmpty && photo) {
+            Get.snackbar(
+              'Invalid',
+              "Profile picture and Username can't be empty",
+              snackPosition: SnackPosition.TOP,
+            );
+            return;
+          }
+          controller.saveUserRecord();
+        },
+        text: "Next",
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
 
@@ -46,6 +58,10 @@ class profile_screen extends StatelessWidget {
 
                 // Name_filed
                 TextFormField(
+                  validator: (value) => MyValidator.validateEmptyText(
+                    "UserName can't be empty",
+                    value,
+                  ),
                   controller: controller.userName,
                   decoration: InputDecoration(
                     hintText: "Enter your name...",
