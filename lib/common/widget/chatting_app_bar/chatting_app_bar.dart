@@ -85,7 +85,7 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
                 if (subtitle != null)
                   Builder(
                     builder: (_) {
-                      // If user is online → no marquee
+                      // If user is online
                       if (subtitle!.toLowerCase() == "online") {
                         return Text(
                           "Online",
@@ -97,8 +97,7 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
                               ),
                         );
                       }
-
-                      // Otherwise show marquee for long "last seen..." text
+                      // Otherwise show marquee for long text
                       return SizedBox(
                         height: 20,
                         child: Marquee(
@@ -112,7 +111,7 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
                           blankSpace: 30,
                           velocity: 20.0,
                           pauseAfterRound: const Duration(seconds: 2),
-                          startPadding: 10,
+                          numberOfRounds: 2,
                         ),
                       );
                     },
