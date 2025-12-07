@@ -29,10 +29,10 @@ class Text_filed extends GetView<ChatController> {
                 decoration: InputDecoration(
                   focusedBorder: OutlineInputBorder(
                     borderSide: BorderSide.none,
-                    borderRadius: BorderRadius.circular(30),
+                    borderRadius: BorderRadius.circular(20),
                   ),
                   enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(30),
+                    borderRadius: BorderRadius.circular(20),
                     borderSide: BorderSide.none,
                   ),
                   prefixIcon: IconButton(
@@ -84,7 +84,7 @@ class Text_filed extends GetView<ChatController> {
                     borderSide: BorderSide.none,
                   ),
                   filled: true,
-                  fillColor: const Color.fromARGB(207, 157, 129, 129),
+                  fillColor: const Color.fromARGB(146, 78, 75, 75),
                 ),
               ),
             ),
