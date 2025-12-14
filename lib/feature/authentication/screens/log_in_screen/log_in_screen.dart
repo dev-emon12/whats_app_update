@@ -26,7 +26,7 @@ class Log_in_screen extends StatelessWidget {
           onPressed: isEmpty
               ? null
               : () {
-                  controller.SignInWithPhoneNumber();
+                  controller.signInWithPhoneNumber();
                 },
           text: "Next",
         );

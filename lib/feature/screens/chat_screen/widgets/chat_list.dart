@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:whats_app/binding/binding.dart';
 import 'package:whats_app/data/repository/user/UserRepository.dart';
 import 'package:whats_app/feature/Chatting_screen/chatting_screen.dart';
 import 'package:whats_app/feature/authentication/Model/UserModel.dart';
@@ -64,7 +65,14 @@ class chat_screen_chat_list extends StatelessWidget {
                     final String read = (data['read'] ?? '').toString();
                     final String toId = (data['toId'] ?? '').toString();
 
+                    final String type = (data['type'] ?? 'text').toString();
+
                     subtitleText = lastMsg;
+                    if (type == MessageType.image.name) {
+                      subtitleText = '📷 Image';
+                    } else {
+                      subtitleText = lastMsg;
+                    }
 
                     timeText = Messagerepository.getLastMessageTime(
                       context: context,
@@ -76,7 +84,7 @@ class chat_screen_chat_list extends StatelessWidget {
                     nameWeight = isUnread ? FontWeight.bold : FontWeight.normal;
                   }
 
-                  //:unread count
+                  //unread count
                   return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
                     stream: Messagerepository.getUnreadMessage(user),
                     builder: (context, unreadSnap) {

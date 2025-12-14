@@ -68,9 +68,11 @@ class ChattingScreen extends StatelessWidget {
             onVideoCall: () {
               Get.to(() => CallPage(otherUser: otherUser, isVideoCall: true));
             },
-            onVoiceCall: () =>
-                CallPage(otherUser: otherUser, isVideoCall: false),
+            onVoiceCall: () {
+              Get.to(() => CallPage(otherUser: otherUser, isVideoCall: false));
+            },
           ),
+
           body: SafeArea(
             child: Column(
               children: [

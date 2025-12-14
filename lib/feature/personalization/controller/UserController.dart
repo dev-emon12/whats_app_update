@@ -3,12 +3,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:whats_app/data/repository/authentication_repo/AuthenticationRepo.dart';
 import 'package:whats_app/data/repository/user/UserRepository.dart';
 import 'package:whats_app/feature/NavBar/navbar.dart';
 import 'package:whats_app/feature/authentication/Model/UserModel.dart';
-import 'package:whats_app/feature/authentication/backend/MessageRepo/MessageRepository.dart';
-import 'package:whats_app/utiles/const/keys.dart';
 import 'package:whats_app/utiles/popup/MyFullScreenLoader.dart';
 import 'package:whats_app/utiles/popup/SnackbarHepler.dart';
 import 'package:dio/dio.dart' as dio;
@@ -19,7 +16,6 @@ class UserController extends GetxController {
   Rx<UserModel> user = UserModel.empty().obs;
   final _userRepository = Get.put(UserRepository());
   TextEditingController userName = TextEditingController();
-  final _messageRepo = Get.put(Messagerepository());
 
   // Update user profile picture
   Future<void> updateUserProfilePicture() async {
@@ -116,18 +112,14 @@ class UserController extends GetxController {
   // updateActiveStatus
   Future<void> updateActiveStatus(bool isOnline) async {
     try {
-      final uid = AuthenticationRepository.instance.currentUser!.uid;
+      final uid = FirebaseAuth.instance.currentUser!.uid;
 
-      await FirebaseFirestore.instance
-          .collection(MyKeys.userCollection)
-          .doc(uid)
-          .update({
-            'isOnline': isOnline,
-            'lastActive': FieldValue.serverTimestamp(),
-            'pushToken': Messagerepository.me.pushToken ?? '',
-          });
+      await FirebaseFirestore.instance.collection('users').doc(uid).update({
+        'isOnline': isOnline,
+        'lastActive': FieldValue.serverTimestamp(),
+      });
     } catch (e) {
-      print("Update active status failed: $e");
+      debugPrint("Update active status failed: $e");
     }
   }
 

@@ -98,7 +98,7 @@ class verify_screen extends StatelessWidget {
 
                 // verify code input box
                 Pinput(
-                  key: controller.OTPkey,
+                  key: controller.otpKey,
                   length: 6,
                   controller: controller.otpController,
 

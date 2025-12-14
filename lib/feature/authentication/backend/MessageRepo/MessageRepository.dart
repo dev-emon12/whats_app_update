@@ -5,7 +5,6 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:dio/dio.dart' as dio;
-
 import 'package:image_picker/image_picker.dart';
 import 'package:whats_app/binding/binding.dart';
 import 'package:whats_app/feature/authentication/Model/UserModel.dart';
@@ -16,14 +15,12 @@ class Messagerepository extends GetxController {
 
   final _firestore = FirebaseFirestore.instance;
   final _auth = FirebaseAuth.instance;
-  // final _chatController = Get.put(ChatController);
   static FirebaseMessaging fMessaging = FirebaseMessaging.instance;
-
-  // final UserModel otherUser = Get.arguments as UserModel;
   final isSending = false.obs;
   static late UserModel me;
+  // final _firestore = FirebaseFirestore.instance;
 
-  /// Call this after  UserModel
+  // Call this after  UserModel
   Future<void> getFirebaseMessageToken() async {
     await fMessaging.requestPermission();
 
@@ -34,12 +31,12 @@ class Messagerepository extends GetxController {
     }
   }
 
-  /// Get all messages
+  // Get all messages
   Stream<QuerySnapshot<Map<String, dynamic>>> getAllMessage() {
     return _firestore.collection("message").snapshots();
   }
 
-  /// Build conversation ID between current user and another user
+  // Build conversation ID between current user and another user
   static String getConversationID(String otherUserId) {
     final myId = FirebaseAuth.instance.currentUser!.uid;
     return myId.hashCode <= otherUserId.hashCode
@@ -72,8 +69,12 @@ class Messagerepository extends GetxController {
 
     final cid = getConversationID(chatUser.id);
 
+    final String senderName = Messagerepository.me.username;
+
     await FirebaseFirestore.instance
-        .collection('chats/$cid/messages')
+        .collection('chats')
+        .doc(cid)
+        .collection('messages')
         .doc(timeId)
         .set({
           'toId': chatUser.id,
@@ -82,7 +83,7 @@ class Messagerepository extends GetxController {
           'read': '',
           'type': type.name,
           'sent': FieldValue.serverTimestamp(),
-          'publicId': '',
+          'senderName': senderName,
         });
   }
 
@@ -145,7 +146,7 @@ class Messagerepository extends GetxController {
       const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
       return weekdays[dt.weekday - 1];
     }
-    // fallback: dd/MM/yy
+    // dd/MM/yy
     return '${dt.day.toString().padLeft(2, '0')}/'
         '${dt.month.toString().padLeft(2, '0')}/'
         '${dt.year.toString().substring(2)}';
@@ -263,7 +264,7 @@ class Messagerepository extends GetxController {
         .snapshots();
   }
 
-  // sent image and upload to cloudinary
+  //sent image and upload to cloudinary
   Future<void> sendImageMessage({
     required UserModel otherUser,
     required Future<dio.Response> Function(File file) uploadFn,
@@ -283,13 +284,13 @@ class Messagerepository extends GetxController {
       // Upload to Cloudinary (uses the function you pass in)
       final dio.Response res = await uploadFn(file);
 
-      debugPrint("Cloudinary Response: ${res.data}");
+      // debugPrint("Cloudinary Response: ${res.data}");
 
       if (res.statusCode != 200 || res.data == null) {
         throw "Upload failed with status ${res.statusCode}";
       }
 
-      //  Safely parse response
+      // parse response
       late final Map<String, dynamic> data;
 
       if (res.data is Map<String, dynamic>) {
@@ -309,16 +310,16 @@ class Messagerepository extends GetxController {
 
       final String? publicId = data["public_id"]?.toString();
 
-      //  Now send the image message into chat
+      // send the image message into chat
       await Messagerepository.sendMessage(
         otherUser,
         imageUrl,
         MessageType.image,
       );
 
-      debugPrint("Image message sent: $imageUrl (publicId = $publicId)");
-    } catch (e, st) {
-      debugPrint("sendImageMessage error: $e\n$st");
+      // debugPrint("Image message sent: $imageUrl (publicId = $publicId)");
+    } catch (e) {
+      // debugPrint("sendImageMessage error: $e\n$st");
       MySnackBarHelpers.errorSnackBar(
         title: "Image Send Failed",
         message: e.toString(),
@@ -328,27 +329,16 @@ class Messagerepository extends GetxController {
     }
   }
 
-  // // update image in firestore
-  // Future<void> updateSingleField(Map<String, dynamic> map) async {
-  //   try {
-  //     final uid = AuthenticationRepository.instance.currentUser!.uid;
+  // Save fcm token
+  Future<void> saveFcmToken() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return;
 
-  //     await FirebaseFirestore.instance
-  //         .collection('chats')
-  //         .doc(uid)
-  //         .collection('messages')
-  //         .doc(uid)
-  //         .set(map, SetOptions(merge: true));
-  //   } on FirebaseAuthException catch (e) {
-  //     throw MyFirebaseAuthException(e.code).message;
-  //   } on FirebaseException catch (e) {
-  //     throw MyFirebaseException(e.code).message;
-  //   } on FormatException catch (_) {
-  //     throw MyFormatException();
-  //   } on PlatformException catch (e) {
-  //     throw MyPlatformException(e.code).message;
-  //   } catch (e) {
-  //     throw "Something went wrong.Please try again";
-  //   }
-  // }
+    final token = await FirebaseMessaging.instance.getToken();
+    if (token == null || token.isEmpty) return;
+
+    await _firestore.collection('users').doc(uid).update({'pushToken': token});
+
+    print("✅ FCM token saved: $token");
+  }
 }

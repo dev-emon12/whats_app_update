@@ -1,18 +1,14 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:whats_app/feature/NavBar/navbar.dart';
+import 'package:whats_app/feature/authentication/backend/MessageRepo/MessageRepository.dart';
 import 'package:whats_app/feature/authentication/screens/log_in_screen/log_in_screen.dart';
 import 'package:whats_app/feature/authentication/screens/verify_screen/verify_screen.dart';
 import 'package:whats_app/feature/authentication/screens/welcome_screen.dart';
 import 'package:whats_app/feature/personalization/screen/profile/profile.dart';
-import 'package:whats_app/utiles/exception/firebase_auth_exceptions.dart';
-import 'package:whats_app/utiles/exception/firebase_exceptions.dart';
-import 'package:whats_app/utiles/exception/formate_exceptions.dart';
-import 'package:whats_app/utiles/exception/platform_exceptions.dart';
 import 'package:whats_app/utiles/popup/MyFullScreenLoader.dart';
 import 'package:whats_app/utiles/popup/SnackbarHepler.dart';
 
@@ -20,17 +16,26 @@ class AuthenticationRepository extends GetxController {
   static AuthenticationRepository get instance => Get.find();
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  String VerifyId = '';
+
+  String verifyId = '';
   RxString fullPhone = ''.obs;
   TextEditingController otpController = TextEditingController();
+
   User? get currentUser => _auth.currentUser;
-  final LocalStorage = GetStorage();
-  RxBool isPhoneEmpty = true.obs;
+
+  final localStorage = GetStorage();
+
   final signUpKey = GlobalKey<FormState>();
-  final OTPkey = GlobalKey<FormState>();
+  final otpKey = GlobalKey<FormState>();
+  final _messageRepo = Get.put(Messagerepository());
 
   @override
-  void onReady() {
+  Future<void> onReady() async {
+    super.onReady();
+    if (_auth.currentUser != null) {
+      await Messagerepository.instance.saveFcmToken();
+    }
+
     FlutterNativeSplash.remove();
     screenRedirect();
   }
@@ -40,21 +45,15 @@ class AuthenticationRepository extends GetxController {
     final user = _auth.currentUser;
 
     if (user != null) {
-      // User logged in
       if (user.phoneNumber != null && user.phoneNumber!.isNotEmpty) {
-        // User has a verified phone number
         await GetStorage.init(user.uid);
-
         Get.offAll(() => navigationMenuScreen());
       } else {
-        // User logged in but phone not verified
         Get.offAll(() => profile_screen());
       }
     } else {
-      // User not logged in
-      LocalStorage.writeIfNull("isFirstTime", true);
-
-      final isFirst = LocalStorage.read("isFirstTime");
+      localStorage.writeIfNull("isFirstTime", true);
+      final isFirst = localStorage.read("isFirstTime");
 
       if (isFirst == true) {
         Get.offAll(() => welcome_screen());
@@ -65,90 +64,73 @@ class AuthenticationRepository extends GetxController {
   }
 
   // sign_in_with_phone_number
-  void SignInWithPhoneNumber() async {
+  void signInWithPhoneNumber() async {
     try {
-      // start loading
       MyFullScreenLoader.openLoadingDialog(
         "We are processing your information...",
       );
 
-      // Check Internet Connectivity
-      // bool isConnected = await NetworkManager.instance.isConnected();
-      // if (!isConnected) {
-      //   MySnackBarHelpers.warningSnackBar(title: "No Internet Connection");
-      //   return;
-      // }
+      if (!signUpKey.currentState!.validate()) return;
 
-      // form validation
-      if (!signUpKey.currentState!.validate()) {
-        return;
-      }
-
-      // verify number
       await _auth.verifyPhoneNumber(
-        phoneNumber: fullPhone.string,
+        phoneNumber: fullPhone.value,
         verificationCompleted: (PhoneAuthCredential credential) {},
         verificationFailed: (FirebaseException e) {
+          MyFullScreenLoader.stopLoading();
           MySnackBarHelpers.errorSnackBar(title: "Something went wrong");
-          print("Error was : ${e.toString()}");
         },
         codeSent: (String verificationId, int? resendToken) {
-          VerifyId = verificationId;
+          verifyId = verificationId;
+
           MySnackBarHelpers.successSnackBar(
             title: "OTP Sent",
             message: "OTP sent on your number",
           );
 
           MyFullScreenLoader.stopLoading();
-          Get.to(verify_screen());
+          Get.to(() => verify_screen());
         },
         codeAutoRetrievalTimeout: (verificationId) {},
       );
-    } on FirebaseAuthException catch (e) {
-      throw MyFirebaseAuthException(e.code).message;
-    } on FirebaseException catch (e) {
-      throw MyFirebaseException(e.code).message;
-    } on FormatException catch (_) {
-      throw MyFormatException();
-    } on PlatformException catch (e) {
-      throw MyPlatformException(e.code).message;
     } catch (e) {
       MyFullScreenLoader.stopLoading();
       Get.back();
-      throw "Something went wrong.Please try again";
+      MySnackBarHelpers.errorSnackBar(title: "Failed", message: e.toString());
     }
   }
 
-  // verifuy_with_otp
+  // verify_with_otp
   void verifyWithOtp() async {
     try {
-      // Start loading
       MyFullScreenLoader.openLoadingDialog(
         "We are processing your information...",
       );
 
-      PhoneAuthCredential credential = PhoneAuthProvider.credential(
-        verificationId: VerifyId,
-        smsCode: otpController.text,
+      final credential = PhoneAuthProvider.credential(
+        verificationId: verifyId,
+        smsCode: otpController.text.trim(),
       );
+
       await _auth.signInWithCredential(credential);
+
+      // save token
+      await _messageRepo.saveFcmToken();
+
+      MyFullScreenLoader.stopLoading();
+
       MySnackBarHelpers.successSnackBar(
         title: "Verified",
-        message: "Your number was verified sucessfully",
+        message: "Your number was verified successfully",
       );
-      MyFullScreenLoader.stopLoading();
-      Get.offAll(profile_screen());
-    } on FirebaseAuthException catch (e) {
-      throw MyFirebaseAuthException(e.code).message;
-    } on FirebaseException catch (e) {
-      throw MyFirebaseException(e.code).message;
-    } on FormatException catch (_) {
-      throw MyFormatException();
-    } on PlatformException catch (e) {
-      throw MyPlatformException(e.code).message;
+
+      Get.offAll(() => profile_screen());
     } catch (e) {
       MyFullScreenLoader.stopLoading();
-      throw "Something went wrong.Please try again";
+      Get.back();
+      MySnackBarHelpers.errorSnackBar(
+        title: "OTP Failed",
+        message: e.toString(),
+      );
     }
   }
 }

@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:whats_app/common/widget/appbar/MyAppBar.dart';
 import 'package:whats_app/common/widget/search_bar/search_bar.dart';
 import 'package:whats_app/data/repository/user/UserRepository.dart';
+import 'package:whats_app/data/service/notification_service/NotificationService.dart';
 import 'package:whats_app/feature/authentication/backend/chatScreenController/ChatScreenController.dart';
 import 'package:whats_app/feature/screens/chat_screen/widgets/chat_list.dart';
 import 'package:whats_app/feature/screens/chat_screen/widgets/popUpMenu.dart';
@@ -48,7 +49,14 @@ class chat_screen extends StatelessWidget {
         height: Mysize.floatingButtonHeight,
         width: Mysize.floatingButtonWidth,
         child: ElevatedButton(
-          onPressed: () {},
+          onPressed: () async {
+            await NotificationService.instance.showChatNotification(
+              id: 1,
+              title: "Test",
+              body: "Hello",
+              payload: "test_payload",
+            );
+          },
           style: ElevatedButton.styleFrom(
             padding: EdgeInsets.zero,
             backgroundColor: const Color.fromARGB(255, 2, 173, 65),
