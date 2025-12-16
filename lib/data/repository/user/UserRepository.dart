@@ -166,4 +166,15 @@ class UserRepository extends GetxController {
   Stream<QuerySnapshot<Map<String, dynamic>>> getAllUsersStream() {
     return _Db.collection(MyKeys.userCollection).snapshots();
   }
+
+  // Future<void> syncAuthDisplayName(String username) async {
+  //   final u = FirebaseAuth.instance.currentUser;
+  //   if (u == null) return;
+
+  //   final name = username.trim();
+  //   if (name.isEmpty) return;
+
+  //   await u.updateDisplayName(name);
+  //   await u.reload();
+  // }
 }

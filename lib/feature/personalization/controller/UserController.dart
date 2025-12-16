@@ -69,42 +69,55 @@ class UserController extends GetxController {
   // save user record in firebase
   Future<void> saveUserRecord() async {
     try {
-      // start loading
       MyFullScreenLoader.openLoadingDialog(
         "We are processing your information...",
       );
-      final firebaseUser = FirebaseAuth.instance.currentUser;
 
-      if (firebaseUser == null) {
-        throw Exception("No logged in user found");
-      }
+      final firebaseUser = FirebaseAuth.instance.currentUser;
+      if (firebaseUser == null) throw Exception("No logged in user found");
 
       final time = DateTime.now().millisecondsSinceEpoch.toString();
 
-      final usernameFromInput = userName.text.trim();
+      // ✅ Always make a valid username
+      final inputName = userName.text.trim();
+      final fallbackName =
+          (firebaseUser.displayName?.trim().isNotEmpty ?? false)
+          ? firebaseUser.displayName!.trim()
+          : (firebaseUser.phoneNumber?.trim().isNotEmpty ?? false)
+          ? firebaseUser.phoneNumber!.trim()
+          : "Guest";
+
+      final finalUserName = inputName.isNotEmpty ? inputName : fallbackName;
+
+      // ✅ Update FirebaseAuth displayName (ZEGO reads this if you use displayName)
+      await firebaseUser.updateDisplayName(finalUserName);
+      await firebaseUser.reload();
 
       final updatedData = {
         "id": firebaseUser.uid,
-        "username": usernameFromInput.isNotEmpty
-            ? usernameFromInput
-            : (firebaseUser.displayName ?? "User"),
+        "username": finalUserName,
         "email": firebaseUser.email ?? "",
         "phoneNumber": firebaseUser.phoneNumber ?? "",
         "about": "Hi, there. I'm using WhatsApp",
         "createdAt": time,
         "isOnline": true,
         "lastActive": time,
-        "pushToken": "",
+
+        // ✅ do NOT overwrite token with empty if you already saved it elsewhere
+        // "pushToken": "",
       };
 
       await _userRepository.updateSingleField(updatedData);
+      await FirebaseAuth.instance.currentUser!.updateDisplayName(finalUserName);
+      await FirebaseAuth.instance.currentUser!.reload();
+
       MyFullScreenLoader.stopLoading();
       Get.offAll(() => navigationMenuScreen());
     } catch (e) {
       MyFullScreenLoader.stopLoading();
       MySnackBarHelpers.warningSnackBar(
         title: "Data not saved",
-        message: "Something went wrong while saving your information",
+        message: e.toString(),
       );
     }
   }

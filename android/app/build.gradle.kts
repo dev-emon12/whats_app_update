@@ -12,13 +12,11 @@ android {
     namespace = "com.example.whats_app"
     compileSdk = 36
     ndkVersion = flutter.ndkVersion
-    proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
         isCoreLibraryDesugaringEnabled = true
     }
-
     kotlinOptions {
         jvmTarget = "17"
     }
@@ -36,7 +34,6 @@ android {
         getByName("release") {
             signingConfig = signingConfigs.getByName("debug")
         }
-        proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
     }
 }
 
@@ -46,5 +43,4 @@ flutter {
 
 dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.3")
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
 }

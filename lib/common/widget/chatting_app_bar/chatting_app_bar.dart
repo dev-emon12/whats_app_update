@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:marquee/marquee.dart';
+import 'package:whats_app/feature/authentication/Model/UserModel.dart';
 import 'package:whats_app/utiles/theme/const/colors.dart';
 import 'package:whats_app/utiles/theme/const/image.dart';
 import 'package:whats_app/utiles/theme/helpers/helper_function.dart';
+import 'package:zego_uikit/zego_uikit.dart';
+import 'package:zego_uikit_prebuilt_call/zego_uikit_prebuilt_call.dart';
 
 class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
   const ChatAppBar({
@@ -10,10 +13,9 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
     required this.name,
     required this.subtitle,
     required this.avatarImage,
+    required this.otherUser, // ✅ IMPORTANT
     this.onBack,
     this.onProfileTap,
-    this.videoCallAction,
-    this.voiceCallAction,
     this.onMore,
     this.height = 70,
   });
@@ -22,14 +24,12 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String? subtitle;
   final ImageProvider? avatarImage;
 
+  final UserModel otherUser; // ✅ IMPORTANT
+
   final VoidCallback? onBack;
   final VoidCallback? onProfileTap;
-
-  // Instead of callbacks, use widgets
-  final Widget? videoCallAction;
-  final Widget? voiceCallAction;
-
   final VoidCallback? onMore;
+
   final double height;
 
   @override
@@ -58,12 +58,12 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
           GestureDetector(
             onTap: onProfileTap,
             child: CircleAvatar(
-              radius: 25,
+              radius: 22,
               backgroundImage:
                   avatarImage ?? const AssetImage(MyImage.onProfileScreen),
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 10),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -78,9 +78,11 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
+
                 if (subtitle != null)
                   Builder(
                     builder: (_) {
+                      // ✅ no animation when online
                       if (subtitle!.toLowerCase() == "online") {
                         return Text(
                           "Online",
@@ -92,8 +94,10 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
                               ),
                         );
                       }
+
+                      // ✅ marquee only for last seen text
                       return SizedBox(
-                        height: 20,
+                        height: 18,
                         child: Marquee(
                           text: subtitle!,
                           style: Theme.of(context).textTheme.labelLarge!
@@ -103,9 +107,10 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
                                     : Mycolors.dark.withOpacity(0.7),
                               ),
                           blankSpace: 30,
-                          velocity: 20.0,
+                          velocity: 20,
                           pauseAfterRound: const Duration(seconds: 2),
                           numberOfRounds: 2,
+                          startAfter: const Duration(milliseconds: 300),
                         ),
                       );
                     },
@@ -115,9 +120,40 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
           ),
         ],
       ),
+
       actions: [
-        if (videoCallAction != null) videoCallAction!,
-        if (voiceCallAction != null) voiceCallAction!,
+        //  VOICE CALL (small size to avoid overflow)
+        SizedBox(
+          width: 44,
+          height: 44,
+          child: ZegoSendCallInvitationButton(
+            resourceID: "ZegoCall",
+            invitees: [
+              ZegoUIKitUser(id: otherUser.id, name: otherUser.username),
+            ],
+            isVideoCall: false,
+            buttonSize: const Size(50, 50),
+            iconSize: const Size(40, 40),
+          ),
+        ),
+
+        const SizedBox(width: 6),
+
+        //  VIDEO CALL
+        SizedBox(
+          width: 44,
+          height: 44,
+          child: ZegoSendCallInvitationButton(
+            resourceID: "ZegoCall",
+            invitees: [
+              ZegoUIKitUser(id: otherUser.id, name: otherUser.username),
+            ],
+            isVideoCall: true,
+            buttonSize: const Size(50, 50),
+            iconSize: const Size(40, 40),
+          ),
+        ),
+
         IconButton(
           onPressed: onMore,
           icon: Icon(

@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
@@ -11,8 +12,6 @@ import 'package:whats_app/feature/authentication/screens/welcome_screen.dart';
 import 'package:whats_app/feature/personalization/screen/profile/profile.dart';
 import 'package:whats_app/utiles/popup/MyFullScreenLoader.dart';
 import 'package:whats_app/utiles/popup/SnackbarHepler.dart';
-import 'package:zego_uikit_prebuilt_call/zego_uikit_prebuilt_call.dart';
-import 'package:zego_uikit_signaling_plugin/zego_uikit_signaling_plugin.dart';
 
 class AuthenticationRepository extends GetxController {
   static AuthenticationRepository get instance => Get.find();
@@ -21,6 +20,7 @@ class AuthenticationRepository extends GetxController {
 
   String verifyId = '';
   RxString fullPhone = ''.obs;
+
   final TextEditingController otpController = TextEditingController();
 
   User? get currentUser => _auth.currentUser;
@@ -32,8 +32,6 @@ class AuthenticationRepository extends GetxController {
 
   late final Messagerepository _messageRepo;
 
-  bool _zegoInited = false;
-
   @override
   void onInit() {
     super.onInit();
@@ -44,55 +42,22 @@ class AuthenticationRepository extends GetxController {
   Future<void> onReady() async {
     super.onReady();
 
-    // If already logged in
+    // if already logged in, init FCM + ZEGO
     if (_auth.currentUser != null) {
-      await _safeAfterLoginInit();
+      await _afterLoginInit();
     }
 
     FlutterNativeSplash.remove();
     await screenRedirect();
   }
 
-  // Runs ONLY when user is authenticated
-  Future<void> _safeAfterLoginInit() async {
+  //  runs only when user is authenticated
+  Future<void> _afterLoginInit() async {
     final user = _auth.currentUser;
     if (user == null) return;
 
-    //  Save FCM token for push notifications
+    // save FCM token
     await _messageRepo.saveFcmToken();
-
-    //  Init Zego call invitation service
-    _initZegoCallOnce(
-      userId: user.uid,
-      userName: user.displayName ?? user.phoneNumber ?? 'User',
-    );
-  }
-
-  void _initZegoCallOnce({required String userId, required String userName}) {
-    if (_zegoInited) return;
-    _zegoInited = true;
-
-    ZegoUIKitPrebuiltCallInvitationService().init(
-      appID: 1791254756,
-      appSign:
-          "6d100a52da23818ae74db2848a4e1dc0d91f09cf1842555b040626051b51ca93",
-      userID: userId,
-      userName: userName,
-      plugins: [ZegoUIKitSignalingPlugin()],
-    );
-  }
-
-  @override
-  void onClose() {
-    otpController.dispose();
-
-    // Optional but recommended:
-    // stop zego service when app/controller is destroyed
-    try {
-      ZegoUIKitPrebuiltCallInvitationService().uninit();
-    } catch (_) {}
-
-    super.onClose();
   }
 
   // Redirect to correct screen
@@ -149,6 +114,7 @@ class AuthenticationRepository extends GetxController {
             title: "OTP Sent",
             message: "OTP sent on your number",
           );
+
           Get.to(() => verify_screen());
         },
         codeAutoRetrievalTimeout: (String verificationId) {
@@ -175,10 +141,11 @@ class AuthenticationRepository extends GetxController {
 
       await _auth.signInWithCredential(credential);
 
-      // After login: save fcm + init zego
-      await _safeAfterLoginInit();
+      // ✅ After login: save fcm + init ZEGO
+      await _afterLoginInit();
 
       MyFullScreenLoader.stopLoading();
+
       MySnackBarHelpers.successSnackBar(
         title: "Verified",
         message: "Your number was verified successfully",
@@ -192,5 +159,25 @@ class AuthenticationRepository extends GetxController {
         message: e.toString(),
       );
     }
+  }
+
+  // getSafeUserNameFromFirestore
+  Future<String> getSafeUserNameFromFirestore(String uid) async {
+    final snap = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .get();
+    final data = snap.data();
+    final name = (data?['username'] ?? '').toString().trim();
+    if (name.isNotEmpty) return name;
+
+    final phone = FirebaseAuth.instance.currentUser?.phoneNumber?.trim() ?? '';
+    return phone.isNotEmpty ? phone : 'Guest';
+  }
+
+  @override
+  void onClose() {
+    otpController.dispose();
+    super.onClose();
   }
 }

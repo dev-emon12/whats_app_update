@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:whats_app/common/widget/appbar/MyAppBar.dart';
 import 'package:whats_app/common/widget/search_bar/search_bar.dart';
 import 'package:whats_app/data/repository/user/UserRepository.dart';
-import 'package:whats_app/data/service/notification_service/NotificationService.dart';
 import 'package:whats_app/feature/authentication/backend/chatScreenController/ChatScreenController.dart';
 import 'package:whats_app/feature/screens/chat_screen/widgets/chat_list.dart';
 import 'package:whats_app/feature/screens/chat_screen/widgets/popUpMenu.dart';

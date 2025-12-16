@@ -11,8 +11,6 @@ import 'package:whats_app/feature/authentication/backend/chatController/ChatCont
 import 'package:whats_app/feature/personalization/controller/UserController.dart';
 import 'package:whats_app/utiles/theme/const/image.dart';
 import 'package:whats_app/utiles/theme/helpers/helper_function.dart';
-import 'package:zego_uikit_prebuilt_call/zego_uikit_prebuilt_call.dart';
-import 'package:zego_uikit/zego_uikit.dart';
 
 class ChattingScreen extends StatelessWidget {
   const ChattingScreen({super.key});
@@ -66,22 +64,7 @@ class ChattingScreen extends StatelessWidget {
             avatarImage: liveUser.profilePicture.isNotEmpty
                 ? NetworkImage(liveUser.profilePicture)
                 : AssetImage(MyImage.onProfileScreen),
-
-            videoCallAction: ZegoSendCallInvitationButton(
-              isVideoCall: true,
-              invitees: [
-                ZegoUIKitUser(id: otherUser.id, name: otherUser.username),
-              ],
-              icon: ButtonIcon(icon: Icon(Icons.videocam_outlined)),
-            ),
-
-            voiceCallAction: ZegoSendCallInvitationButton(
-              isVideoCall: false,
-              invitees: [
-                ZegoUIKitUser(id: otherUser.id, name: otherUser.username),
-              ],
-              icon: ButtonIcon(icon: Icon(Icons.call_outlined)),
-            ),
+            otherUser: otherUser,
           ),
 
           body: SafeArea(

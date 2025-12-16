@@ -1,41 +1,63 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:whats_app/feature/authentication/Model/UserModel.dart';
-import 'package:whats_app/feature/authentication/backend/MessageRepo/MessageRepository.dart';
+import 'package:whats_app/data/repository/authentication_repo/AuthenticationRepo.dart';
 import 'package:zego_uikit_prebuilt_call/zego_uikit_prebuilt_call.dart';
+import 'package:zego_uikit_signaling_plugin/zego_uikit_signaling_plugin.dart';
 
-class CallPage extends StatelessWidget {
-  const CallPage({
-    super.key,
-    required this.otherUser,
-    required this.isVideoCall,
-  });
+class ZegoService {
+  ZegoService._();
+  static final ZegoService instance = ZegoService._();
 
-  final UserModel otherUser;
-  final bool isVideoCall;
+  final authRepo = AuthenticationRepository.instance;
+  bool _inited = false;
+  bool get isInited => _inited;
 
-  @override
-  Widget build(BuildContext context) {
-    // current user
-    final current = FirebaseAuth.instance.currentUser!;
-    final String myId = current.uid;
-    final String myName = current.displayName ?? 'User';
+  Future<void> init({
+    required GlobalKey<NavigatorState> navigatorKey,
+    required String userId,
+    required String userName,
+  }) async {
+    // ✅ Always use the passed userId
+    final String safeId = userId.trim();
+    if (safeId.isEmpty) {
+      debugPrint("❌ ZEGO init blocked: userId empty");
+      return;
+    }
 
-    // use your existing conversationID as callID
-    final String callID = Messagerepository.getConversationID(otherUser.id);
+    // ✅ Get safe name (Firestore fallback)
+    String safeName = userName.trim();
+    if (safeName.isEmpty) {
+      try {
+        safeName = (await authRepo.getSafeUserNameFromFirestore(safeId)).trim();
+      } catch (e) {
+        debugPrint("⚠️ getSafeUserNameFromFirestore failed: $e");
+      }
+    }
 
-    return SafeArea(
-      child: ZegoUIKitPrebuiltCall(
-        appID: 1791254756,
-        appSign:
-            "6d100a52da23818ae74db2848a4e1dc0d91f09cf1842555b040626051b51ca93",
-        userID: myId,
-        userName: myName,
-        callID: callID,
-        config: isVideoCall
-            ? ZegoUIKitPrebuiltCallConfig.oneOnOneVideoCall()
-            : ZegoUIKitPrebuiltCallConfig.oneOnOneVoiceCall(),
-      ),
+    // ✅ Final fallback (must not be empty)
+    if (safeName.isEmpty) safeName = "Guest";
+
+    if (_inited) return;
+    _inited = true;
+
+    ZegoUIKitPrebuiltCallInvitationService().setNavigatorKey(navigatorKey);
+
+    await ZegoUIKitPrebuiltCallInvitationService().init(
+      appID: 1791254756,
+      appSign:
+          "6d100a52da23818ae74db2848a4e1dc0d91f09cf1842555b040626051b51ca93",
+      userID: safeId,
+      userName: safeName,
+      plugins: [ZegoUIKitSignalingPlugin()],
+      invitationEvents: ZegoUIKitPrebuiltCallInvitationEvents(),
     );
+
+    debugPrint("✅ ZEGO init success: $safeId / $safeName");
+  }
+
+  void uninit() {
+    try {
+      ZegoUIKitPrebuiltCallInvitationService().uninit();
+    } catch (_) {}
+    _inited = false;
   }
 }
