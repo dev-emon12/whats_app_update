@@ -16,24 +16,16 @@ class ZegoService {
     required String userId,
     required String userName,
   }) async {
-    // ✅ Always use the passed userId
-    final String safeId = userId.trim();
+    final safeId = userId.trim();
     if (safeId.isEmpty) {
-      debugPrint("❌ ZEGO init blocked: userId empty");
+      debugPrint(" ZEGO init blocked: userId empty");
       return;
     }
 
-    // ✅ Get safe name (Firestore fallback)
     String safeName = userName.trim();
     if (safeName.isEmpty) {
-      try {
-        safeName = (await authRepo.getSafeUserNameFromFirestore(safeId)).trim();
-      } catch (e) {
-        debugPrint("⚠️ getSafeUserNameFromFirestore failed: $e");
-      }
+      safeName = (await authRepo.getSafeUserNameFromFirestore(safeId)).trim();
     }
-
-    // ✅ Final fallback (must not be empty)
     if (safeName.isEmpty) safeName = "Guest";
 
     if (_inited) return;
@@ -41,17 +33,22 @@ class ZegoService {
 
     ZegoUIKitPrebuiltCallInvitationService().setNavigatorKey(navigatorKey);
 
-    await ZegoUIKitPrebuiltCallInvitationService().init(
-      appID: 1791254756,
-      appSign:
-          "6d100a52da23818ae74db2848a4e1dc0d91f09cf1842555b040626051b51ca93",
-      userID: safeId,
-      userName: safeName,
-      plugins: [ZegoUIKitSignalingPlugin()],
-      invitationEvents: ZegoUIKitPrebuiltCallInvitationEvents(),
-    );
+    try {
+      await ZegoUIKitPrebuiltCallInvitationService().init(
+        appID: 1791254756,
+        appSign:
+            "6d100a52da23818ae74db2848a4e1dc0d91f09cf1842555b040626051b51ca93",
+        userID: safeId,
+        userName: safeName,
+        plugins: [ZegoUIKitSignalingPlugin()],
+        invitationEvents: ZegoUIKitPrebuiltCallInvitationEvents(),
+      );
 
-    debugPrint("✅ ZEGO init success: $safeId / $safeName");
+      debugPrint(" ZEGO Invitation Service init OK: $safeId / $safeName");
+    } catch (e) {
+      _inited = false;
+      debugPrint(" ZEGO init failed: $e");
+    }
   }
 
   void uninit() {

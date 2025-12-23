@@ -8,6 +8,7 @@ import 'package:dio/dio.dart' as dio;
 import 'package:image_picker/image_picker.dart';
 import 'package:whats_app/binding/binding.dart';
 import 'package:whats_app/feature/authentication/Model/UserModel.dart';
+import 'package:whats_app/utiles/const/keys.dart';
 import 'package:whats_app/utiles/popup/SnackbarHepler.dart';
 
 class Messagerepository extends GetxController {
@@ -177,7 +178,7 @@ class Messagerepository extends GetxController {
     return FirebaseFirestore.instance
         .collection("chats")
         .doc(cid)
-        .collection("messages")
+        .collection(MyKeys.messageCollection)
         .orderBy("sent", descending: true)
         .limit(1)
         .snapshots();
@@ -256,9 +257,9 @@ class Messagerepository extends GetxController {
     final myId = FirebaseAuth.instance.currentUser!.uid;
     final cid = getConversationID(user.id);
     return FirebaseFirestore.instance
-        .collection('chats')
+        .collection(MyKeys.chatCollection)
         .doc(cid)
-        .collection('messages')
+        .collection(MyKeys.messageCollection)
         .where('toId', isEqualTo: myId)
         .where('read', isEqualTo: '')
         .snapshots();
@@ -339,6 +340,6 @@ class Messagerepository extends GetxController {
 
     await _firestore.collection('users').doc(uid).update({'pushToken': token});
 
-    print("✅ FCM token saved: $token");
+    print(" FCM token saved: $token");
   }
 }

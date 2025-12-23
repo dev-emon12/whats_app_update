@@ -78,7 +78,7 @@ class UserController extends GetxController {
 
       final time = DateTime.now().millisecondsSinceEpoch.toString();
 
-      // ✅ Always make a valid username
+      //   make a valid username
       final inputName = userName.text.trim();
       final fallbackName =
           (firebaseUser.displayName?.trim().isNotEmpty ?? false)
@@ -89,7 +89,7 @@ class UserController extends GetxController {
 
       final finalUserName = inputName.isNotEmpty ? inputName : fallbackName;
 
-      // ✅ Update FirebaseAuth displayName (ZEGO reads this if you use displayName)
+      //  Update FirebaseAuth displayName ZEGO reads this if you use displayName
       await firebaseUser.updateDisplayName(finalUserName);
       await firebaseUser.reload();
 
@@ -102,9 +102,6 @@ class UserController extends GetxController {
         "createdAt": time,
         "isOnline": true,
         "lastActive": time,
-
-        // ✅ do NOT overwrite token with empty if you already saved it elsewhere
-        // "pushToken": "",
       };
 
       await _userRepository.updateSingleField(updatedData);

@@ -10,6 +10,7 @@ import 'package:whats_app/feature/authentication/screens/log_in_screen/log_in_sc
 import 'package:whats_app/feature/authentication/screens/verify_screen/verify_screen.dart';
 import 'package:whats_app/feature/authentication/screens/welcome_screen.dart';
 import 'package:whats_app/feature/personalization/screen/profile/profile.dart';
+import 'package:whats_app/utiles/const/keys.dart';
 import 'package:whats_app/utiles/popup/MyFullScreenLoader.dart';
 import 'package:whats_app/utiles/popup/SnackbarHepler.dart';
 
@@ -19,8 +20,10 @@ class AuthenticationRepository extends GetxController {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   String verifyId = '';
-  RxString fullPhone = ''.obs;
+  int? _resendToken; // ✅ ADD THIS
+  bool _isSendingOtp = false; // ✅ prevent multi taps
 
+  RxString fullPhone = ''.obs;
   final TextEditingController otpController = TextEditingController();
 
   User? get currentUser => _auth.currentUser;
@@ -42,50 +45,55 @@ class AuthenticationRepository extends GetxController {
   Future<void> onReady() async {
     super.onReady();
 
-    // if already logged in, init FCM + ZEGO
-    if (_auth.currentUser != null) {
+    final user = await _auth.authStateChanges().first;
+
+    if (user != null) {
       await _afterLoginInit();
     }
 
     FlutterNativeSplash.remove();
-    await screenRedirect();
+    await screenRedirect(user);
   }
 
-  //  runs only when user is authenticated
   Future<void> _afterLoginInit() async {
     final user = _auth.currentUser;
     if (user == null) return;
 
-    // save FCM token
     await _messageRepo.saveFcmToken();
   }
 
-  // Redirect to correct screen
-  Future<void> screenRedirect() async {
-    final user = _auth.currentUser;
-
+  // screenRedirect
+  Future<void> screenRedirect(User? user) async {
     if (user != null) {
       if (user.phoneNumber != null && user.phoneNumber!.isNotEmpty) {
         await GetStorage.init(user.uid);
-        Get.offAll(() => navigationMenuScreen());
+
+        if (user.displayName == null || user.displayName!.trim().isEmpty) {
+          Get.offAll(() => profile_screen());
+        } else {
+          Get.offAll(() => navigationMenuScreen());
+        }
       } else {
-        Get.offAll(() => profile_screen());
+        Get.offAll(() => Log_in_screen());
       }
       return;
     }
 
     localStorage.writeIfNull("isFirstTime", true);
-    final isFirst = localStorage.read("isFirstTime") as bool?;
+    final bool isFirstTime = localStorage.read("isFirstTime") ?? true;
 
-    if (isFirst == true) {
+    if (isFirstTime) {
       Get.offAll(() => welcome_screen());
     } else {
       Get.offAll(() => Log_in_screen());
     }
   }
 
-  // Sign in with phone number
+  //  SEND OTP
   Future<void> signInWithPhoneNumber() async {
+    if (_isSendingOtp) return;
+    _isSendingOtp = true;
+
     try {
       MyFullScreenLoader.openLoadingDialog(
         "We are processing your information...",
@@ -93,23 +101,32 @@ class AuthenticationRepository extends GetxController {
 
       if (!signUpKey.currentState!.validate()) {
         MyFullScreenLoader.stopLoading();
+        _isSendingOtp = false;
         return;
       }
 
       await _auth.verifyPhoneNumber(
-        phoneNumber: fullPhone.value,
+        phoneNumber: fullPhone.value.trim(),
+        timeout: const Duration(seconds: 60),
+
         verificationCompleted: (PhoneAuthCredential credential) {},
-        verificationFailed: (FirebaseException e) {
+
+        verificationFailed: (FirebaseAuthException e) {
           MyFullScreenLoader.stopLoading();
+          _isSendingOtp = false;
           MySnackBarHelpers.errorSnackBar(
             title: "Verification Failed",
-            message: e.message ?? "Unknown error",
+            message: e.message ?? e.code,
           );
         },
+
         codeSent: (String verificationId, int? resendToken) {
           verifyId = verificationId;
+          _resendToken = resendToken;
 
           MyFullScreenLoader.stopLoading();
+          _isSendingOtp = false;
+
           MySnackBarHelpers.successSnackBar(
             title: "OTP Sent",
             message: "OTP sent on your number",
@@ -117,19 +134,85 @@ class AuthenticationRepository extends GetxController {
 
           Get.to(() => verify_screen());
         },
+
         codeAutoRetrievalTimeout: (String verificationId) {
           verifyId = verificationId;
+          _isSendingOtp = false;
         },
       );
     } catch (e) {
       MyFullScreenLoader.stopLoading();
+      Get.back();
+      _isSendingOtp = false;
       MySnackBarHelpers.errorSnackBar(title: "Failed", message: e.toString());
     }
   }
 
-  // Verify OTP
+  // RESEND OTP
+  Future<void> resendOtp() async {
+    if (_isSendingOtp) return;
+    _isSendingOtp = true;
+
+    try {
+      MyFullScreenLoader.openLoadingDialog("Resending OTP...");
+
+      await _auth.verifyPhoneNumber(
+        phoneNumber: fullPhone.value.trim(),
+        timeout: const Duration(seconds: 60),
+
+        forceResendingToken: _resendToken,
+
+        verificationCompleted: (PhoneAuthCredential credential) {},
+
+        verificationFailed: (FirebaseAuthException e) {
+          MyFullScreenLoader.stopLoading();
+          _isSendingOtp = false;
+          MySnackBarHelpers.errorSnackBar(
+            title: "Resend Failed",
+            message: e.message ?? e.code,
+          );
+        },
+
+        codeSent: (String verificationId, int? resendToken) {
+          verifyId = verificationId;
+          _resendToken = resendToken;
+
+          MyFullScreenLoader.stopLoading();
+          _isSendingOtp = false;
+
+          MySnackBarHelpers.successSnackBar(
+            title: "OTP Resent",
+            message: "A new OTP has been sent",
+          );
+        },
+
+        codeAutoRetrievalTimeout: (String verificationId) {
+          verifyId = verificationId;
+          _isSendingOtp = false;
+        },
+      );
+    } catch (e) {
+      MyFullScreenLoader.stopLoading();
+      Get.back();
+      _isSendingOtp = false;
+      MySnackBarHelpers.errorSnackBar(
+        title: "Resend Failed",
+        message: e.toString(),
+      );
+    }
+  }
+
+  //  VERIFY OTP
   Future<void> verifyWithOtp() async {
     try {
+      if (verifyId.trim().isEmpty) {
+        MySnackBarHelpers.errorSnackBar(
+          title: "Session expired",
+          message: "Please resend OTP",
+        );
+        return;
+      }
+
       MyFullScreenLoader.openLoadingDialog(
         "We are processing your information...",
       );
@@ -141,7 +224,6 @@ class AuthenticationRepository extends GetxController {
 
       await _auth.signInWithCredential(credential);
 
-      // ✅ After login: save fcm + init ZEGO
       await _afterLoginInit();
 
       MyFullScreenLoader.stopLoading();
@@ -152,8 +234,15 @@ class AuthenticationRepository extends GetxController {
       );
 
       Get.offAll(() => profile_screen());
+    } on FirebaseAuthException catch (e) {
+      MyFullScreenLoader.stopLoading();
+      MySnackBarHelpers.errorSnackBar(
+        title: "OTP Failed",
+        message: e.message ?? e.code,
+      );
     } catch (e) {
       MyFullScreenLoader.stopLoading();
+      Get.back();
       MySnackBarHelpers.errorSnackBar(
         title: "OTP Failed",
         message: e.toString(),
@@ -161,10 +250,10 @@ class AuthenticationRepository extends GetxController {
     }
   }
 
-  // getSafeUserNameFromFirestore
+  // Get Safe User Name From Firestore
   Future<String> getSafeUserNameFromFirestore(String uid) async {
     final snap = await FirebaseFirestore.instance
-        .collection('users')
+        .collection(MyKeys.userCollection)
         .doc(uid)
         .get();
     final data = snap.data();

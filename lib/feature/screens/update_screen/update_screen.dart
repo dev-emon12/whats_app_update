@@ -47,7 +47,7 @@ class update_screen extends StatelessWidget {
           // 2nd_button
           SizedBox(
             height: Mysize.floatingButtonHeight,
-            width: Mysize.floatingButtonWidth,
+            width: Mysize.addfloatingButtonWidth,
             child: ElevatedButton(
               onPressed: () {},
               style: ElevatedButton.styleFrom(

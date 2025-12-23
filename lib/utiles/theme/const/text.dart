@@ -17,7 +17,10 @@ class MyText {
   static const String verify_phone_number_2nd_text =
       "Waiting to automatically detect 6-digit code sent by \n ";
   static const String verify_phone_number_3rd_text = " SMS to ";
-  static const String verify_phone_number_4rt_text = " Wrong number?";
+  static const String verify_phone_number_4rt_text = ". Wrong number?";
+  static const String verify_phone_number_resent_otp = "Re-send OTP : ";
+
+  static const String verify_phone_number_resent_text = "Resend";
   static const String verify_screen_receive_code = "Didn't receive code?";
 
   // profile_screen

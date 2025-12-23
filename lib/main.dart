@@ -5,10 +5,8 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:whats_app/common/widget/permision_handeler/permission_handeler.dart';
 import 'package:whats_app/data/service/notification_service/NotificationService.dart';
-import 'package:whats_app/feature/Chatting_screen/widget/call_page.dart'
-    show ZegoService;
+import 'package:whats_app/data/service/zego_service.dart';
 import 'package:whats_app/firebase_options.dart';
 import 'package:whats_app/my_apps.dart';
 import 'data/repository/authentication_repo/AuthenticationRepo.dart';
@@ -36,28 +34,22 @@ Future<void> main() async {
   NotificationService.instance.initFcmListeners();
   await NotificationService.instance.requestAndroidPermissionIfNeeded();
 
-  Get.put(PermissionHandeler());
   FirebaseAuth.instance.authStateChanges().listen((user) async {
     if (user == null) {
-      // user logged out → stop ZEGO
       ZegoService.instance.uninit();
       return;
     }
 
-    final String userId = user.uid;
-
-    // IMPORTANT: name must NOT be empty
-    final String userName = (user.phoneNumber ?? user.displayName ?? "Guest")
-        .trim();
+    final safeId = user.uid;
+    final safeName = (user.displayName ?? user.phoneNumber ?? '').trim();
 
     await ZegoService.instance.init(
       navigatorKey: navigatorKey,
-      userId: userId,
-      userName: userName.isEmpty ? "Guest" : userName,
+      userId: safeId,
+      userName: safeName,
     );
   });
 
-  // ✅ Init / Uninit ZEGO based on login state
   _authSub = FirebaseAuth.instance.authStateChanges().listen((User? u) async {
     if (u == null) {
       ZegoService.instance.uninit();
@@ -66,7 +58,7 @@ Future<void> main() async {
 
     final String userId = u.uid;
 
-    // ✅ VERY IMPORTANT: must be non-empty for ZEGO
+    // for ZEGO
     final String rawName = (u.displayName ?? '').trim();
     final String safeName = rawName.isNotEmpty
         ? rawName

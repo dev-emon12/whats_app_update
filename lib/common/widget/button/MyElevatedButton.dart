@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:whats_app/utiles/theme/const/sizes.dart';
 
 class MyElevatedButton extends StatelessWidget {
   const MyElevatedButton({
@@ -15,12 +16,13 @@ class MyElevatedButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: double.infinity,
+      width: Mysize.floatingButtonWidth,
+      height: Mysize.floatingButtonHeight,
       child: ElevatedButton(
         onPressed: isLoading ? null : onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color.fromARGB(255, 2, 173, 65),
-          padding: const EdgeInsets.symmetric(vertical: 16),
+          backgroundColor: Color.fromARGB(255, 2, 173, 65),
+          padding: EdgeInsets.symmetric(vertical: 16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(50),
           ),

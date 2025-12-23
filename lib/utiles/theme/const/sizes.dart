@@ -22,7 +22,8 @@ class Mysize {
   static const double buttonWidth = 120.0;
   static const double searchBarHeight = 50.0;
   static const double floatingButtonHeight = 55.0;
-  static const double floatingButtonWidth = 55.0;
+  static const double floatingButtonWidth = 380.0;
+  static const double addfloatingButtonWidth = 55.0;
 
   // AppBar height
   static const double appBarHeight = 56.0;

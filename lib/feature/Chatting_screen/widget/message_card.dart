@@ -14,24 +14,59 @@ class MessageCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final bool isDark = MyHelperFunction.isDarkMode(context);
 
-    final String text = (message['msg'] ?? '').toString();
+    // IMPORTANT FIX: support both "message" and "msg"
+    final String msg = (message['message'] ?? message['msg'] ?? '').toString();
+
     final dynamic time = message['sent'];
     final bool isSeen = (message['read'] ?? '').toString().isNotEmpty;
 
-    final String? fromId = message['fromId'] as String?;
     final String myId = FirebaseAuth.instance.currentUser!.uid;
+    final String fromId = (message['fromId'] ?? '').toString();
     final bool isSentByMe = fromId == myId;
 
     final String type = (message['type'] ?? 'text').toString();
     final bool isImage = type == 'image';
+    final bool isCall = type == 'call';
+
+    // ✅ CALL fields
+    // callType saved by your CallRepo = "audio" / "video"
+    final String rawCallType = (message['callType'] ?? 'audio').toString();
+    final String callType = rawCallType.toLowerCase() == 'audio'
+        ? 'voice'
+        : rawCallType.toLowerCase(); // keep "video" as video
+
+    final String callStatus = (message['callStatus'] ?? '')
+        .toString(); // missed/ended/answered/rejected
+    final int durationSec =
+        int.tryParse((message['durationSec'] ?? 0).toString()) ?? 0;
+
+    final bool isMissed = callStatus.toLowerCase() == 'missed';
+    final bool isRejected = callStatus.toLowerCase() == 'rejected';
+
+    final IconData callIcon = callType == 'video' ? Icons.videocam : Icons.call;
+
+    // ✅ WhatsApp-like text
+    String callTitle;
+    if (isMissed) {
+      callTitle = "Missed ${callType == 'video' ? 'video' : 'voice'} call";
+    } else if (isRejected) {
+      callTitle = "Rejected ${callType == 'video' ? 'video' : 'voice'} call";
+    } else {
+      callTitle = "${callType == 'video' ? 'Video' : 'Voice'} call";
+    }
+
+    String callSubtitle = "";
+    if (!isMissed && !isRejected && durationSec > 0) {
+      callSubtitle = _formatDuration(durationSec);
+    }
 
     return Align(
       alignment: isSentByMe ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         padding: EdgeInsets.symmetric(
-          vertical: isImage ? 6 : 10,
-          horizontal: isImage ? 6 : 14,
+          vertical: (isImage || isCall) ? 6 : 10,
+          horizontal: (isImage || isCall) ? 8 : 14,
         ),
         decoration: BoxDecoration(
           color: isSentByMe
@@ -49,38 +84,77 @@ class MessageCard extends StatelessWidget {
               ? CrossAxisAlignment.end
               : CrossAxisAlignment.start,
           children: [
-            // text OR image
+            // ---------- CONTENT ----------
             if (isImage)
-              GestureDetector(
-                onTap: () {},
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: Image.network(
-                    text,
-                    width: 280,
-                    fit: BoxFit.cover,
-                    loadingBuilder: (context, child, loadingprogress) {
-                      if (loadingprogress == null) return child;
-                      return Container(
-                        width: 220,
-                        height: 220,
-                        color: Colors.black26,
-                        child: const Center(
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Image.network(
+                  msg,
+                  width: 280,
+                  fit: BoxFit.cover,
+                  loadingBuilder: (context, child, loadingprogress) {
+                    if (loadingprogress == null) return child;
+                    return Container(
+                      width: 220,
+                      height: 220,
+                      color: Colors.black26,
+                      child: const Center(
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
                         ),
-                      );
-                    },
-                    errorBuilder: (_, __, ___) =>
-                        const Icon(Icons.broken_image, color: Colors.white70),
-                  ),
+                      ),
+                    );
+                  },
+                  errorBuilder: (_, __, ___) =>
+                      const Icon(Icons.broken_image, color: Colors.white70),
                 ),
+              )
+            else if (isCall)
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    callIcon,
+                    size: 18,
+                    color: isMissed ? Colors.redAccent : Colors.white,
+                  ),
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          callTitle,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.titleLarge!
+                              .copyWith(
+                                color: Mycolors.light,
+                                fontSize: 15,
+                                fontWeight: (isMissed || isRejected)
+                                    ? FontWeight.bold
+                                    : FontWeight.normal,
+                              ),
+                        ),
+                        if (callSubtitle.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 2),
+                            child: Text(
+                              callSubtitle,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Colors.white70,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
               )
             else
               Text(
-                text,
+                msg,
                 style: Theme.of(context).textTheme.titleLarge!.copyWith(
                   color: Mycolors.light,
                   fontSize: 15,
@@ -89,7 +163,7 @@ class MessageCard extends StatelessWidget {
 
             const SizedBox(height: 4),
 
-            // TIME + DOUBLE TICK
+            // ---------- TIME + TICK ----------
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -122,5 +196,12 @@ class MessageCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _formatDuration(int seconds) {
+    final int m = seconds ~/ 60;
+    final int s = seconds % 60;
+    if (m <= 0) return "${s}s";
+    return "${m}m ${s}s";
   }
 }

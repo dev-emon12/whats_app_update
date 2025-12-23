@@ -10,4 +10,6 @@ class MyKeys {
   static String uploadImage = "Chat Image";
 
   static String userCollection = "users";
+  static String chatCollection = "chats";
+  static String messageCollection = "messages";
 }

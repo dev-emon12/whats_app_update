@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:marquee/marquee.dart';
+import 'package:whats_app/common/widget/permision_handeler/permission_handeler.dart';
 import 'package:whats_app/feature/authentication/Model/UserModel.dart';
 import 'package:whats_app/utiles/theme/const/colors.dart';
 import 'package:whats_app/utiles/theme/const/image.dart';
@@ -13,7 +16,7 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
     required this.name,
     required this.subtitle,
     required this.avatarImage,
-    required this.otherUser, // ✅ IMPORTANT
+    required this.otherUser,
     this.onBack,
     this.onProfileTap,
     this.onMore,
@@ -23,8 +26,7 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String name;
   final String? subtitle;
   final ImageProvider? avatarImage;
-
-  final UserModel otherUser; // ✅ IMPORTANT
+  final UserModel otherUser;
 
   final VoidCallback? onBack;
   final VoidCallback? onProfileTap;
@@ -38,6 +40,11 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     final bool isDark = MyHelperFunction.isDarkMode(context);
+
+    // ✅ Correct type for ZegoSendCallInvitationButton
+    final invitees = [
+      ZegoUIKitUser(id: otherUser.id, name: otherUser.username),
+    ];
 
     return AppBar(
       backgroundColor: isDark ? Mycolors.dark : Mycolors.light,
@@ -78,11 +85,9 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-
                 if (subtitle != null)
                   Builder(
                     builder: (_) {
-                      // ✅ no animation when online
                       if (subtitle!.toLowerCase() == "online") {
                         return Text(
                           "Online",
@@ -94,8 +99,6 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
                               ),
                         );
                       }
-
-                      // ✅ marquee only for last seen text
                       return SizedBox(
                         height: 18,
                         child: Marquee(
@@ -122,35 +125,64 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
       ),
 
       actions: [
-        //  VOICE CALL (small size to avoid overflow)
-        SizedBox(
-          width: 44,
-          height: 44,
-          child: ZegoSendCallInvitationButton(
-            resourceID: "ZegoCall",
-            invitees: [
-              ZegoUIKitUser(id: otherUser.id, name: otherUser.username),
-            ],
-            isVideoCall: false,
-            buttonSize: const Size(50, 50),
-            iconSize: const Size(40, 40),
+        //  VOICE CALL
+        GestureDetector(
+          onTap: () {
+            Get.put(PermissionHandeler());
+          },
+          child: SizedBox(
+            width: 44,
+            height: 44,
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+
+              child: ZegoSendCallInvitationButton(
+                resourceID: "ZegoCall",
+                isVideoCall: false,
+                invitees: invitees,
+                icon: ButtonIcon(
+                  icon: Icon(
+                    Icons.call_outlined,
+                    color: isDark ? Mycolors.light : Mycolors.textPrimary,
+                  ),
+                ),
+                buttonSize: const Size(44, 44),
+                iconSize: const Size(28, 28),
+                verticalLayout: false,
+                text: null,
+              ),
+            ),
           ),
         ),
 
         const SizedBox(width: 6),
 
         //  VIDEO CALL
-        SizedBox(
-          width: 44,
-          height: 44,
-          child: ZegoSendCallInvitationButton(
-            resourceID: "ZegoCall",
-            invitees: [
-              ZegoUIKitUser(id: otherUser.id, name: otherUser.username),
-            ],
-            isVideoCall: true,
-            buttonSize: const Size(50, 50),
-            iconSize: const Size(40, 40),
+        GestureDetector(
+          onTap: () {
+            Get.put(PermissionHandeler());
+          },
+          child: SizedBox(
+            width: 44,
+            height: 44,
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: ZegoSendCallInvitationButton(
+                resourceID: "ZegoCall",
+                isVideoCall: true,
+                invitees: invitees,
+                icon: ButtonIcon(
+                  icon: Icon(
+                    Icons.videocam_outlined,
+                    color: isDark ? Mycolors.light : Mycolors.textPrimary,
+                  ),
+                ),
+                buttonSize: const Size(44, 44),
+                iconSize: const Size(28, 28),
+                verticalLayout: false,
+                text: null,
+              ),
+            ),
           ),
         ),
 

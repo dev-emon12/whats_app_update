@@ -46,7 +46,7 @@ class chat_screen extends StatelessWidget {
       // add button
       floatingActionButton: SizedBox(
         height: Mysize.floatingButtonHeight,
-        width: Mysize.floatingButtonWidth,
+        width: Mysize.anotherfloatingButtonWidth,
         child: ElevatedButton(
           onPressed: () async {
             // await NotificationService.instance.showChatNotification(

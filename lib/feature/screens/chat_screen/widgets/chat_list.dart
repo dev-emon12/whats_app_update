@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:whats_app/binding/binding.dart';
 import 'package:whats_app/data/repository/user/UserRepository.dart';
 import 'package:whats_app/feature/Chatting_screen/chatting_screen.dart';
 import 'package:whats_app/feature/authentication/Model/UserModel.dart';
@@ -19,6 +18,7 @@ class chat_screen_chat_list extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = Get.put(UserRepository());
     final isDark = MyHelperFunction.isDarkMode(context);
+    final String myId = FirebaseAuth.instance.currentUser!.uid;
 
     return Expanded(
       child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
@@ -35,9 +35,7 @@ class chat_screen_chat_list extends StatelessWidget {
             return const Center(child: Text("No users found"));
           }
 
-          final docs = snapshot.data!.docs;
-
-          final List<UserModel> users = docs
+          final users = snapshot.data!.docs
               .map((doc) => UserModel.fromSnapshot(doc))
               .toList();
 
@@ -47,7 +45,6 @@ class chat_screen_chat_list extends StatelessWidget {
             itemCount: users.length,
             itemBuilder: (context, index) {
               final user = users[index];
-              final String myId = FirebaseAuth.instance.currentUser!.uid;
 
               return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
                 stream: Messagerepository.GetLastMessage(user),
@@ -60,18 +57,19 @@ class chat_screen_chat_list extends StatelessWidget {
                     final lastDoc = lastSnap.data!.docs.first;
                     final data = lastDoc.data();
 
-                    final String lastMsg = (data['msg'] ?? '').toString();
+                    final String msg = (data['msg'] ?? '').toString();
                     final dynamic sentTime = data['sent'];
                     final String read = (data['read'] ?? '').toString();
                     final String toId = (data['toId'] ?? '').toString();
-
                     final String type = (data['type'] ?? 'text').toString();
 
-                    subtitleText = lastMsg;
-                    if (type == MessageType.image.name) {
-                      subtitleText = '📷 Image';
+                    //  show proper preview based on message type
+                    if (type == 'image') {
+                      subtitleText = "📸 Image";
+                    } else if (type == 'call') {
+                      subtitleText = "📞 Call";
                     } else {
-                      subtitleText = lastMsg;
+                      subtitleText = msg;
                     }
 
                     timeText = Messagerepository.getLastMessageTime(
@@ -79,19 +77,15 @@ class chat_screen_chat_list extends StatelessWidget {
                       time: sentTime,
                     );
 
-                    // basic unread and using last message
                     final bool isUnread = (toId == myId) && read.isEmpty;
                     nameWeight = isUnread ? FontWeight.bold : FontWeight.normal;
                   }
 
-                  //unread count
                   return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
                     stream: Messagerepository.getUnreadMessage(user),
                     builder: (context, unreadSnap) {
                       int unreadCount = 0;
-                      if (unreadSnap.hasData &&
-                          unreadSnap.data != null &&
-                          unreadSnap.data!.docs.isNotEmpty) {
+                      if (unreadSnap.hasData && unreadSnap.data != null) {
                         unreadCount = unreadSnap.data!.docs.length;
                       }
 
@@ -111,17 +105,14 @@ class chat_screen_chat_list extends StatelessWidget {
 
                       return ListTile(
                         onTap: () {
-                          Get.to(() => const ChattingScreen(), arguments: user);
+                          Get.to(() => ChattingScreen(), arguments: user);
                         },
                         leading: CircleAvatar(
                           radius: 24,
                           backgroundImage: user.profilePicture.isNotEmpty
                               ? NetworkImage(user.profilePicture)
-                              : const AssetImage(MyImage.onProfileScreen)
-                                    as ImageProvider,
+                              : const AssetImage(MyImage.onProfileScreen),
                         ),
-
-                        // USER NAME
                         title: Text(
                           user.username,
                           overflow: TextOverflow.ellipsis,
@@ -134,8 +125,6 @@ class chat_screen_chat_list extends StatelessWidget {
                                 fontWeight: effectiveNameWeight,
                               ),
                         ),
-
-                        // LAST MESSAGE AND ABOUT
                         subtitle: Text(
                           subtitleText,
                           overflow: TextOverflow.ellipsis,
@@ -148,8 +137,6 @@ class chat_screen_chat_list extends StatelessWidget {
                                 fontWeight: subtitleWeight,
                               ),
                         ),
-
-                        // TIME AND UNREAD COUNT
                         trailing: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.end,
@@ -166,7 +153,6 @@ class chat_screen_chat_list extends StatelessWidget {
                                   ),
                             ),
                             const SizedBox(height: 6),
-
                             if (hasUnread)
                               Container(
                                 padding: const EdgeInsets.symmetric(

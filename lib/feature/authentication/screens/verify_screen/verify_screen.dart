@@ -5,6 +5,7 @@ import 'package:whats_app/common/widget/appbar/MyAppBar.dart';
 import 'package:whats_app/common/widget/button/MyElevatedButton.dart';
 import 'package:whats_app/common/widget/style/screen_padding.dart';
 import 'package:whats_app/data/repository/authentication_repo/AuthenticationRepo.dart';
+import 'package:whats_app/feature/authentication/screens/verify_screen/widgets/Re-send_otp.dart';
 import 'package:whats_app/utiles/theme/const/colors.dart';
 import 'package:whats_app/utiles/theme/const/sizes.dart';
 import 'package:whats_app/utiles/theme/const/text.dart';
@@ -29,7 +30,7 @@ class verify_screen extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         border: Border.all(
-          color: dark ? Mycolors.light.withOpacity(0.5) : Colors.grey,
+          color: dark ? Mycolors.light.withOpacity(0.5) : Mycolors.grey,
         ),
         borderRadius: BorderRadius.circular(12),
       ),
@@ -117,11 +118,16 @@ class verify_screen extends StatelessWidget {
                 SizedBox(height: Mysize.searchBarHeight),
 
                 // didn't receive code
-                Text(
-                  MyText.verify_screen_receive_code,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyLarge!.copyWith(color: Mycolors.success),
+                GestureDetector(
+                  onTap: () {
+                    showCustomBottomSheet(context);
+                  },
+                  child: Text(
+                    MyText.verify_screen_receive_code,
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodyLarge!.copyWith(color: Mycolors.success),
+                  ),
                 ),
               ],
             ),
