@@ -23,7 +23,7 @@ class navigationMenuScreen extends StatelessWidget {
           selectedIndex: controller.selectedIndex.value,
           backgroundColor: dark ? Mycolors.dark : Mycolors.light,
           indicatorColor: dark
-              ? const Color.fromARGB(255, 2, 173, 65).withValues(alpha: .2)
+              ? Color.fromARGB(255, 2, 173, 65).withValues(alpha: .2)
               : Mycolors.dark.withValues(alpha: .1),
           onDestinationSelected: (index) {
             controller.selectedIndex.value = index;

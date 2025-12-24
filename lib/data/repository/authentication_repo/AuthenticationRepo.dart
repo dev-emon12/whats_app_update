@@ -9,6 +9,7 @@ import 'package:whats_app/feature/authentication/backend/MessageRepo/MessageRepo
 import 'package:whats_app/feature/authentication/screens/log_in_screen/log_in_screen.dart';
 import 'package:whats_app/feature/authentication/screens/verify_screen/verify_screen.dart';
 import 'package:whats_app/feature/authentication/screens/welcome_screen.dart';
+import 'package:whats_app/feature/personalization/controller/UserController.dart';
 import 'package:whats_app/feature/personalization/screen/profile/profile.dart';
 import 'package:whats_app/utiles/const/keys.dart';
 import 'package:whats_app/utiles/popup/MyFullScreenLoader.dart';
@@ -20,8 +21,8 @@ class AuthenticationRepository extends GetxController {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   String verifyId = '';
-  int? _resendToken; // ✅ ADD THIS
-  bool _isSendingOtp = false; // ✅ prevent multi taps
+  int? _resendToken;
+  bool _isSendingOtp = false;
 
   RxString fullPhone = ''.obs;
   final TextEditingController otpController = TextEditingController();
@@ -252,16 +253,21 @@ class AuthenticationRepository extends GetxController {
 
   // Get Safe User Name From Firestore
   Future<String> getSafeUserNameFromFirestore(String uid) async {
-    final snap = await FirebaseFirestore.instance
+    final doc = await FirebaseFirestore.instance
         .collection(MyKeys.userCollection)
         .doc(uid)
         .get();
-    final data = snap.data();
+
+    if (!doc.exists) {
+      return FirebaseAuth.instance.currentUser?.phoneNumber ?? "Guest";
+    }
+
+    final data = doc.data();
     final name = (data?['username'] ?? '').toString().trim();
+
     if (name.isNotEmpty) return name;
 
-    final phone = FirebaseAuth.instance.currentUser?.phoneNumber?.trim() ?? '';
-    return phone.isNotEmpty ? phone : 'Guest';
+    return FirebaseAuth.instance.currentUser?.phoneNumber ?? "Guest";
   }
 
   @override

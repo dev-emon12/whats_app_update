@@ -6,6 +6,7 @@ import 'package:whats_app/data/repository/user/UserRepository.dart';
 import 'package:whats_app/feature/Chatting_screen/chatting_screen.dart';
 import 'package:whats_app/feature/authentication/Model/UserModel.dart';
 import 'package:whats_app/feature/authentication/backend/MessageRepo/MessageRepository.dart';
+import 'package:whats_app/feature/screens/chat_screen/widgets/user_profile_dialog.dart';
 import 'package:whats_app/utiles/theme/const/colors.dart';
 import 'package:whats_app/utiles/theme/const/image.dart';
 import 'package:whats_app/utiles/theme/const/sizes.dart';
@@ -104,14 +105,19 @@ class chat_screen_chat_list extends StatelessWidget {
                           : FontWeight.normal;
 
                       return ListTile(
-                        onTap: () {
-                          Get.to(() => ChattingScreen(), arguments: user);
-                        },
-                        leading: CircleAvatar(
-                          radius: 24,
-                          backgroundImage: user.profilePicture.isNotEmpty
-                              ? NetworkImage(user.profilePicture)
-                              : const AssetImage(MyImage.onProfileScreen),
+                        onTap: () =>
+                            Get.to(() => ChattingScreen(), arguments: user),
+                        leading: GestureDetector(
+                          onTap: () => showUesrDialog(context, user),
+                          child: Hero(
+                            tag: user.id,
+                            child: CircleAvatar(
+                              radius: 24,
+                              backgroundImage: user.profilePicture.isNotEmpty
+                                  ? NetworkImage(user.profilePicture)
+                                  : const AssetImage(MyImage.onProfileScreen),
+                            ),
+                          ),
                         ),
                         title: Text(
                           user.username,

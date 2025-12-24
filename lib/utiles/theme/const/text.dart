@@ -50,4 +50,7 @@ class MyText {
 
   static const String community_screen_3rd_text = " See example communites";
   static const String community_screen_4th_btn_text = "Start your community";
+
+  // profile
+  static const String profile = "Profile";
 }

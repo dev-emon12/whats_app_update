@@ -49,4 +49,9 @@ class Mysize {
   // Image height and width
   static const double profile_image_height = 150.0;
   static const double profile_image_width = 150.0;
+
+  // Uesr Dialog Image Size
+
+  static const double alert_dialog_image_width = 150.0;
+  static const double alert_dialog_image_height = 240.0;
 }

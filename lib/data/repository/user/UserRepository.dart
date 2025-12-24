@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:dio/dio.dart' as dio;
 import 'package:get/get_instance/get_instance.dart';
@@ -162,11 +163,25 @@ class UserRepository extends GetxController {
     }
   }
 
-  // getAllUsersStream
+  // get All Users Stream
   Stream<QuerySnapshot<Map<String, dynamic>>> getAllUsersStream() {
     return _Db.collection(MyKeys.userCollection).snapshots();
   }
 
+  // get User By Id
+  Future<UserModel?> getUserById(String uid) async {
+    try {
+      final doc = await _Db.collection("users").doc(uid).get();
+      // print("The user : $doc");
+
+      if (!doc.exists) return null;
+
+      return UserModel.fromSnapshot(doc);
+    } catch (e) {
+      debugPrint(" getUserById error: $e");
+      return null;
+    }
+  }
   // Future<void> syncAuthDisplayName(String username) async {
   //   final u = FirebaseAuth.instance.currentUser;
   //   if (u == null) return;

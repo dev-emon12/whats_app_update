@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:whats_app/data/repository/user/UserRepository.dart';
 import 'package:whats_app/feature/NavBar/navbar.dart';
 import 'package:whats_app/feature/authentication/Model/UserModel.dart';
+import 'package:whats_app/utiles/const/keys.dart';
 import 'package:whats_app/utiles/popup/MyFullScreenLoader.dart';
 import 'package:whats_app/utiles/popup/SnackbarHepler.dart';
 import 'package:dio/dio.dart' as dio;
@@ -112,6 +113,7 @@ class UserController extends GetxController {
       Get.offAll(() => navigationMenuScreen());
     } catch (e) {
       MyFullScreenLoader.stopLoading();
+      Get.back();
       MySnackBarHelpers.warningSnackBar(
         title: "Data not saved",
         message: e.toString(),
@@ -210,4 +212,30 @@ class UserController extends GetxController {
 
     return 'Last seen on ${dt.day}/${dt.month}/${dt.year} at $timeStr';
   }
+
+  // Future<void> createUserIfNotExists(User user) async {
+  //   final docRef = FirebaseFirestore.instance
+  //       .collection(MyKeys.userCollection)
+  //       .doc(user.uid);
+
+  //   final doc = await docRef.get();
+
+  //   if (!doc.exists) {
+  //     final now = DateTime.now().millisecondsSinceEpoch.toString();
+
+  //     await docRef.set({
+  //       "id": user.uid,
+  //       "username": user.phoneNumber ?? "User",
+  //       "email": user.email ?? "",
+  //       "phoneNumber": user.phoneNumber ?? "",
+  //       "about": "Hey there! I'm using WhatsApp",
+  //       "profilePicture": "",
+  //       "createdAt": now,
+  //       "lastActive": now,
+  //       "isOnline": true,
+  //       "pushToken": "",
+  //       "publicId": "",
+  //     });
+  //   }
+  // }
 }
