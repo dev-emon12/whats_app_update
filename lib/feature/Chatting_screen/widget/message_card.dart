@@ -14,7 +14,7 @@ class MessageCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final bool isDark = MyHelperFunction.isDarkMode(context);
 
-    // IMPORTANT FIX: support both "message" and "msg"
+    // message" and "msg"
     final String msg = (message['message'] ?? message['msg'] ?? '').toString();
 
     final dynamic time = message['sent'];
@@ -28,8 +28,8 @@ class MessageCard extends StatelessWidget {
     final bool isImage = type == 'image';
     final bool isCall = type == 'call';
 
-    // ✅ CALL fields
-    // callType saved by your CallRepo = "audio" / "video"
+    //  CALL fields
+
     final String rawCallType = (message['callType'] ?? 'audio').toString();
     final String callType = rawCallType.toLowerCase() == 'audio'
         ? 'voice'
@@ -45,7 +45,7 @@ class MessageCard extends StatelessWidget {
 
     final IconData callIcon = callType == 'video' ? Icons.videocam : Icons.call;
 
-    // ✅ WhatsApp-like text
+    //  text
     String callTitle;
     if (isMissed) {
       callTitle = "Missed ${callType == 'video' ? 'video' : 'voice'} call";

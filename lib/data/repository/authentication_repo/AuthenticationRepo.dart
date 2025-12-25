@@ -10,7 +10,7 @@ import 'package:whats_app/feature/authentication/screens/log_in_screen/log_in_sc
 import 'package:whats_app/feature/authentication/screens/verify_screen/verify_screen.dart';
 import 'package:whats_app/feature/authentication/screens/welcome_screen.dart';
 import 'package:whats_app/feature/personalization/controller/UserController.dart';
-import 'package:whats_app/feature/personalization/screen/profile/profile.dart';
+import 'package:whats_app/feature/personalization/screen/profile/create_profile.dart';
 import 'package:whats_app/utiles/const/keys.dart';
 import 'package:whats_app/utiles/popup/MyFullScreenLoader.dart';
 import 'package:whats_app/utiles/popup/SnackbarHepler.dart';
@@ -60,7 +60,7 @@ class AuthenticationRepository extends GetxController {
     final user = _auth.currentUser;
     if (user == null) return;
 
-    await _messageRepo.saveFcmToken();
+    // await _messageRepo.saveFcmToken();
   }
 
   // screenRedirect
@@ -226,6 +226,7 @@ class AuthenticationRepository extends GetxController {
       await _auth.signInWithCredential(credential);
 
       await _afterLoginInit();
+      print("error is $credential");
 
       MyFullScreenLoader.stopLoading();
 
@@ -237,6 +238,7 @@ class AuthenticationRepository extends GetxController {
       Get.offAll(() => profile_screen());
     } on FirebaseAuthException catch (e) {
       MyFullScreenLoader.stopLoading();
+      Get.back();
       MySnackBarHelpers.errorSnackBar(
         title: "OTP Failed",
         message: e.message ?? e.code,

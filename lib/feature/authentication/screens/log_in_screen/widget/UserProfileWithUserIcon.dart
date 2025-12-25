@@ -20,7 +20,7 @@ class UserProfileWithUserIcon extends StatelessWidget {
           right: -6,
           child: MyCircularIcon(
             icon: Iconsax.edit,
-            onPressed: controller.updateUserProfilePicture,
+            onPressed: controller.updateUserProfilePictureFromGallery,
           ),
         ),
       ],

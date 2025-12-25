@@ -1,10 +1,11 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:get/get_navigation/src/extension_navigation.dart';
+import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:whats_app/common/widget/appbar/MyAppBar.dart';
 import 'package:whats_app/feature/authentication/Model/UserModel.dart';
+import 'package:whats_app/feature/personalization/controller/UserController.dart';
+import 'package:whats_app/feature/screens/chat_screen/user_profile/widgets/bottom_sheet.dart';
 import 'package:whats_app/utiles/theme/const/image.dart';
 
 class OnScreenProfile extends StatelessWidget {
@@ -12,6 +13,8 @@ class OnScreenProfile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final controller = UserController.instance;
+
     final UserModel? user = Get.arguments as UserModel?;
     if (user == null) {
       return const Scaffold(body: Center(child: Text("Something Went Wrong")));
@@ -24,24 +27,41 @@ class OnScreenProfile extends StatelessWidget {
         ),
         showBackArrow: true,
         actions: [
-          IconButton(onPressed: () {}, icon: Icon(Iconsax.edit)),
+          IconButton(
+            onPressed: () => showEditProfileBottomSheet(context),
+            icon: Icon(Iconsax.edit),
+          ),
           IconButton(onPressed: () {}, icon: Icon(Iconsax.share)),
         ],
       ),
       body: Center(
-        child: ClipRRect(
-          // borderRadius: BorderRadius.circular(100),
-          child: user.profilePicture.isNotEmpty
-              ? CachedNetworkImage(
-                  height: 425,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                  imageUrl: user.profilePicture,
-                  errorWidget: (c, url, err) =>
-                      CircleAvatar(child: Icon(Iconsax.user)),
-                )
-              : Image.asset(MyImage.onProfileScreen, fit: BoxFit.cover),
-        ),
+        child: Obx(() {
+          final user = controller.user.value;
+
+          return Hero(
+            tag: 'profile-photo',
+            child: AnimatedSwitcher(
+              duration: Duration(milliseconds: 10),
+              child: user.profilePicture.isNotEmpty
+                  ? CachedNetworkImage(
+                      key: ValueKey(user.profilePicture),
+                      height: 425,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                      imageUrl: user.profilePicture,
+                      placeholder: (_, __) =>
+                          Center(child: CircularProgressIndicator()),
+                      errorWidget: (c, url, err) =>
+                          CircleAvatar(child: Icon(Iconsax.user)),
+                    )
+                  : Image.asset(
+                      MyImage.onProfileScreen,
+                      key: ValueKey('default'),
+                      fit: BoxFit.cover,
+                    ),
+            ),
+          );
+        }),
       ),
     );
   }

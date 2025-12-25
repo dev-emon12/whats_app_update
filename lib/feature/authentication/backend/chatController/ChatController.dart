@@ -58,20 +58,21 @@ class ChatController extends GetxController {
   //   }
   // }
 
-  // get camera access for chat
-  Future<void> GetCameraAccess() async {
-    final ImagePicker PickImage = ImagePicker();
-    final XFile? image = await PickImage.pickImage(
-      source: ImageSource.camera,
-      imageQuality: 80,
-    );
-  }
-
-  // Image sending logic
-  Future<void> sendImageFromChat() async {
+  // Image sending logic from camera
+  Future<void> sendImageFromCamera() async {
     await Messagerepository.instance.sendImageMessage(
       otherUser: otherUser,
       uploadFn: sentPicture,
+      source: ImageSource.camera,
+    );
+  }
+
+  // Image sending logic from gallery
+  Future<void> sendImageFromGallery() async {
+    await Messagerepository.instance.sendImageMessage(
+      otherUser: otherUser,
+      uploadFn: sentPicture,
+      source: ImageSource.gallery,
     );
   }
 

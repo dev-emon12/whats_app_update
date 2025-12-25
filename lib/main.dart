@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:whats_app/data/service/notification_service/NotificationService.dart';
 import 'package:whats_app/data/service/zego_service.dart';
+import 'package:whats_app/feature/personalization/controller/UserController.dart';
 import 'package:whats_app/firebase_options.dart';
 import 'package:whats_app/my_apps.dart';
 import 'data/repository/authentication_repo/AuthenticationRepo.dart';
@@ -27,6 +28,7 @@ Future<void> main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   Get.put(AuthenticationRepository(), permanent: true);
+  Get.put(UserController(), permanent: true);
 
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 

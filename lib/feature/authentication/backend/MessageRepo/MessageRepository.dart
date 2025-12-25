@@ -268,12 +268,13 @@ class Messagerepository extends GetxController {
   //sent image and upload to cloudinary
   Future<void> sendImageMessage({
     required UserModel otherUser,
+    required ImageSource source,
     required Future<dio.Response> Function(File file) uploadFn,
   }) async {
     try {
       // Pick image
       final XFile? picked = await ImagePicker().pickImage(
-        source: ImageSource.gallery,
+        source: source,
         maxHeight: 1024,
         maxWidth: 1024,
       );
@@ -331,15 +332,15 @@ class Messagerepository extends GetxController {
   }
 
   // Save fcm token
-  Future<void> saveFcmToken() async {
-    final uid = FirebaseAuth.instance.currentUser?.uid;
-    if (uid == null) return;
+  // Future<void> saveFcmToken() async {
+  //   final uid = FirebaseAuth.instance.currentUser?.uid;
+  //   if (uid == null) return;
 
-    final token = await FirebaseMessaging.instance.getToken();
-    if (token == null || token.isEmpty) return;
+  //   final token = await FirebaseMessaging.instance.getToken();
+  //   if (token == null || token.isEmpty) return;
 
-    await _firestore.collection('users').doc(uid).update({'pushToken': token});
+  //   await _firestore.collection('users').doc(uid).update({'pushToken': token});
 
-    print(" FCM token saved: $token");
-  }
+  //   print(" FCM token saved: $token");
+  // }
 }

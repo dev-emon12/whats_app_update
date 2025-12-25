@@ -56,7 +56,7 @@ class Text_filed extends GetView<ChatController> {
                             IconButton(
                               padding: EdgeInsets.zero,
                               constraints: BoxConstraints(),
-                              onPressed: controller.GetCameraAccess,
+                              onPressed: controller.sendImageFromCamera,
                               icon: Icon(
                                 Icons.camera_alt,
                                 color: isDark ? Mycolors.light : Mycolors.dark,
@@ -67,7 +67,7 @@ class Text_filed extends GetView<ChatController> {
                           IconButton(
                             padding: EdgeInsets.zero,
                             constraints: BoxConstraints(),
-                            onPressed: controller.sendImageFromChat,
+                            onPressed: controller.sendImageFromGallery,
                             icon: Icon(
                               Icons.image_rounded,
                               color: isDark ? Mycolors.light : Mycolors.dark,

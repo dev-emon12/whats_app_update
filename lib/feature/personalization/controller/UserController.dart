@@ -6,7 +6,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:whats_app/data/repository/user/UserRepository.dart';
 import 'package:whats_app/feature/NavBar/navbar.dart';
 import 'package:whats_app/feature/authentication/Model/UserModel.dart';
-import 'package:whats_app/utiles/const/keys.dart';
 import 'package:whats_app/utiles/popup/MyFullScreenLoader.dart';
 import 'package:whats_app/utiles/popup/SnackbarHepler.dart';
 import 'package:dio/dio.dart' as dio;
@@ -18,12 +17,28 @@ class UserController extends GetxController {
   final _userRepository = Get.put(UserRepository());
   TextEditingController userName = TextEditingController();
 
+  @override
+  void onInit() {
+    super.onInit();
+    loadCurrentUser();
+  }
+
+  // Update User Profile Picture From Camera
+  Future<void> updateUserProfilePictureFromCamera() async {
+    await updatePicture(ImageSource.camera);
+  }
+
+  // Update User Profile Picture From Gallery
+  Future<void> updateUserProfilePictureFromGallery() async {
+    await updatePicture(ImageSource.gallery);
+  }
+
   // Update user profile picture
-  Future<void> updateUserProfilePicture() async {
+  Future<void> updatePicture(ImageSource source) async {
     try {
       // pick image form gallery
       XFile? image = await ImagePicker().pickImage(
-        source: ImageSource.gallery,
+        source: source,
         maxHeight: 512,
         maxWidth: 512,
       );
@@ -50,6 +65,13 @@ class UserController extends GetxController {
           "publicId": publicId,
         });
 
+        //  update Obx
+        user.update((val) {
+          if (val == null) return;
+          val.profilePicture = imageUrl;
+          val.publicId = publicId;
+        });
+
         // update profile and public id form RxUser
         user.value.profilePicture = imageUrl;
         user.value.publicId = publicId;
@@ -64,6 +86,20 @@ class UserController extends GetxController {
     } catch (e) {
       MyFullScreenLoader.stopLoading();
       MySnackBarHelpers.errorSnackBar(title: "Failed!", message: e.toString());
+    }
+  }
+
+  // load Current User
+  Future<void> loadCurrentUser() async {
+    try {
+      final uid = FirebaseAuth.instance.currentUser?.uid;
+      if (uid == null) return;
+
+      final fetchedUser = await _userRepository.getUserById(uid);
+
+      user.value = fetchedUser!;
+    } catch (e) {
+      debugPrint("Failed to load user: $e");
     }
   }
 
@@ -212,30 +248,4 @@ class UserController extends GetxController {
 
     return 'Last seen on ${dt.day}/${dt.month}/${dt.year} at $timeStr';
   }
-
-  // Future<void> createUserIfNotExists(User user) async {
-  //   final docRef = FirebaseFirestore.instance
-  //       .collection(MyKeys.userCollection)
-  //       .doc(user.uid);
-
-  //   final doc = await docRef.get();
-
-  //   if (!doc.exists) {
-  //     final now = DateTime.now().millisecondsSinceEpoch.toString();
-
-  //     await docRef.set({
-  //       "id": user.uid,
-  //       "username": user.phoneNumber ?? "User",
-  //       "email": user.email ?? "",
-  //       "phoneNumber": user.phoneNumber ?? "",
-  //       "about": "Hey there! I'm using WhatsApp",
-  //       "profilePicture": "",
-  //       "createdAt": now,
-  //       "lastActive": now,
-  //       "isOnline": true,
-  //       "pushToken": "",
-  //       "publicId": "",
-  //     });
-  //   }
-  // }
 }
