@@ -5,13 +5,14 @@ class UserModel {
   String phoneNumber;
   String about;
   String username;
-  final String email;
+  String email;
   String profilePicture;
   String createdAt;
   bool isOnline;
   String pushToken;
   String lastActive;
   String publicId;
+  String links;
 
   UserModel({
     required this.id,
@@ -25,6 +26,7 @@ class UserModel {
     required this.pushToken,
     required this.lastActive,
     this.publicId = '',
+    required this.links,
   });
 
   /// Function to get the full name
@@ -43,6 +45,7 @@ class UserModel {
     pushToken: "",
     lastActive: "",
     publicId: "",
+    links: "Add Links",
   );
 
   Map<String, dynamic> toJson() {
@@ -58,6 +61,7 @@ class UserModel {
       'pushToken': pushToken,
       'lastActive': lastActive,
       'publicId': publicId,
+      'links': links,
     };
   }
 
@@ -89,6 +93,7 @@ class UserModel {
       pushToken: data['pushToken'] ?? '',
       lastActive: readTime(data['lastActive']),
       publicId: data['publicId'] ?? '',
+      links: data['links'] ?? '',
     );
   }
 }

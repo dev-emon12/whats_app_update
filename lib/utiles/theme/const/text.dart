@@ -57,4 +57,22 @@ class MyText {
   // edit profile
   static const String editNameAbout =
       "People will see the name if you interact with them and they don't have you saved as a contacet";
+
+  static const String editUserAbout = "This is visible to everyone";
+
+  // change number screen
+  static const String changeNumberMainText =
+      "Changing your phone number will migrate\n"
+      "your account info, groups & settings.";
+
+  static const String changeNumberSubText =
+      "Before proceeding, please confirm that you are\n"
+      "able to receive SMS or calls at your new number.";
+
+  static const String changeNumberlastText =
+      "If you have both a new phone & a new number, first\n"
+      "change your number on your old phone.";
+
+  static const String changeNumberOtpScreenText =
+      "To keep your account secure, we need to verify your new phone number.A one-time verification code will be sent via SMS.";
 }

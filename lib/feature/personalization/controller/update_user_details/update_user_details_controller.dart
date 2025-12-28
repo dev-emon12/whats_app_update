@@ -5,64 +5,103 @@ import 'package:whats_app/feature/personalization/controller/UserController.dart
 import 'package:whats_app/utiles/popup/MyFullScreenLoader.dart';
 import 'package:whats_app/utiles/popup/SnackbarHepler.dart';
 
-class updateUserDetailsController extends GetxController {
-  static updateUserDetailsController get instance => Get.find();
+class UpdateUserDetailsController extends GetxController {
+  static UpdateUserDetailsController get instance => Get.find();
 
-  final updateUserNameFormKey = GlobalKey<FormState>();
+  // form key
+  final upDateUserNameFormKey = GlobalKey<FormState>();
+  final upDateUserAboutFormKey = GlobalKey<FormState>();
+  final upDateUserNumberFormKey = GlobalKey<FormState>();
+
+  // controller
   final userController = UserController.instance;
-  final userRepo = Get.put(UserRepository());
+  final UserRepository userRepo = Get.put(UserRepository());
 
-  final userNameController = TextEditingController();
-
-  void initializeNames() {
-    userNameController.text = userController.user.value.username;
-  }
+  // textFiled
+  final username = TextEditingController();
+  final about = TextEditingController();
+  final phoneNumberFirst = TextEditingController();
+  final phoneNumberSecond = TextEditingController();
 
   @override
   void onInit() {
     super.onInit();
-    userNameController.text = userController.user.value.username;
+    initializeNames();
   }
 
+  void initializeNames() {
+    username.text = userController.user.value.username;
+    about.text = userController.user.value.about;
+    phoneNumberFirst.text = userController.user.value.phoneNumber;
+  }
+
+  // for update user Name
   Future<void> updateUserName() async {
     try {
-      if (!updateUserNameFormKey.currentState!.validate()) {
-        return;
-      }
+      MyFullScreenLoader.openLoadingDialog(
+        'We are updating your information...',
+      );
 
-      final newName = userNameController.text.trim();
-      if (newName.isEmpty) {
+      if (!upDateUserNameFormKey.currentState!.validate()) {
         MyFullScreenLoader.stopLoading();
-        MySnackBarHelpers.errorSnackBar(title: "Name can't be empty");
         return;
       }
 
-      await userRepo.updateSingleField({"username": newName});
+      Map<String, dynamic> map = {"username": username.text};
 
-      userController.user.update((val) {
-        if (val == null) return;
-        val.username = newName;
-      });
+      userController.user.value.username = username.text;
+
+      await userRepo.updateSingleField(map);
+
       userController.user.refresh();
-
+      MyFullScreenLoader.stopLoading();
       Get.back();
-
       MySnackBarHelpers.successSnackBar(
-        title: "Success",
+        title: "Congratulations",
         message: "Your name has been updated",
       );
     } catch (e) {
       MyFullScreenLoader.stopLoading();
       MySnackBarHelpers.errorSnackBar(
-        title: "Update Failed!",
+        title: "Update named failed!",
         message: e.toString(),
       );
+      print("Error $e");
     }
   }
 
-  @override
-  void onClose() {
-    userController.dispose();
-    super.onClose();
+  // for update user About
+  Future<void> updateUserAbout() async {
+    try {
+      MyFullScreenLoader.openLoadingDialog(
+        'We are updating your information...',
+      );
+
+      if (!upDateUserAboutFormKey.currentState!.validate()) {
+        MyFullScreenLoader.stopLoading();
+        return;
+      }
+
+      Map<String, dynamic> map = {"about": about.text};
+
+      userController.user.value.about = about.text;
+
+      await userRepo.updateSingleField(map);
+
+      userController.user.refresh();
+      MyFullScreenLoader.stopLoading();
+      Get.back();
+      MySnackBarHelpers.successSnackBar(
+        title: "Congratulations",
+        message: "Your name has been updated",
+      );
+    } catch (e) {
+      MyFullScreenLoader.stopLoading();
+      MySnackBarHelpers.errorSnackBar(
+        title: "Update named failed!",
+        message: e.toString(),
+      );
+      print("Error $e");
+    }
   }
 }

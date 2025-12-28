@@ -12,15 +12,15 @@ import 'package:whats_app/utiles/theme/const/text.dart';
 import 'package:whats_app/utiles/theme/helpers/helper_function.dart';
 import 'package:whats_app/utiles/validation/Validations.dart';
 
-class UserDetailsEdit extends StatelessWidget {
-  UserDetailsEdit({super.key});
+class UpdateUserName extends StatelessWidget {
+  UpdateUserName({super.key});
 
   final controller = UserController.instance;
 
   @override
   Widget build(BuildContext context) {
     bool isDark = MyHelperFunction.isDarkMode(context);
-    final updateController = Get.put(updateUserDetailsController());
+    final updateController = Get.put(UpdateUserDetailsController());
 
     return Scaffold(
       appBar: MyAppbar(
@@ -37,14 +37,16 @@ class UserDetailsEdit extends StatelessWidget {
         padding: MyPadding.screenPadding,
         child: Column(
           children: [
-            TextFormField(
-              key: updateController.updateUserNameFormKey,
-              controller: updateController.userNameController,
-              validator: (value) =>
-                  MyValidator.validateEmptyText("Name", value),
-              decoration: InputDecoration(
-                labelText: "Name",
-                prefixIcon: Icon(Iconsax.user),
+            Form(
+              key: updateController.upDateUserNameFormKey,
+              child: TextFormField(
+                controller: updateController.username,
+                validator: (value) =>
+                    MyValidator.validateEmptyText("Name", value),
+                decoration: InputDecoration(
+                  labelText: "Name",
+                  prefixIcon: Icon(Iconsax.user),
+                ),
               ),
             ),
             SizedBox(height: Mysize.defaultSpace),
