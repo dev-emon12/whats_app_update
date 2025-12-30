@@ -45,17 +45,14 @@ class ReAuthenticate extends StatelessWidget {
             ),
 
             SizedBox(height: Mysize.defaultSpace),
-            Form(
-              key: controller.reAuthenticateKey,
-              child: TextFormField(
-                readOnly: true,
-                controller: upDateController.reAuthenticate,
-                validator: (value) =>
-                    MyValidator.validateEmptyText("Phone number", value),
-                decoration: InputDecoration(
-                  labelText: "Phone Number",
-                  prefixIcon: Icon(Iconsax.call),
-                ),
+            TextFormField(
+              readOnly: true,
+              controller: upDateController.reAuthenticate,
+              validator: (value) =>
+                  MyValidator.validateEmptyText("Phone number", value),
+              decoration: InputDecoration(
+                labelText: "Phone Number",
+                prefixIcon: Icon(Iconsax.call),
               ),
             ),
           ],

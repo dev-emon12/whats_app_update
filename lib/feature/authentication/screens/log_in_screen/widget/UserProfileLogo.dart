@@ -16,13 +16,16 @@ class UserProfileLogo extends StatelessWidget {
 
       bool isProfileAvailable = pic.isNotEmpty;
 
-      return MyCirculerImage(
-        image: isProfileAvailable ? pic : MyImage.onProfileScreen,
-        height: Mysize.profile_image_height,
-        width: Mysize.profile_image_width,
-        borderWidth: 5.0,
-        padding: 0,
-        isNetworkImage: isProfileAvailable,
+      return Hero(
+        tag: "profile-photo",
+        child: MyCirculerImage(
+          image: isProfileAvailable ? pic : MyImage.onProfileScreen,
+          height: Mysize.profile_image_height,
+          width: Mysize.profile_image_width,
+          borderWidth: 5.0,
+          padding: 0,
+          isNetworkImage: isProfileAvailable,
+        ),
       );
     });
   }

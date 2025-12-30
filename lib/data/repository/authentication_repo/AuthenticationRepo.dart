@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:whats_app/data/repository/user/UserRepository.dart';
 import 'package:whats_app/feature/NavBar/navbar.dart';
+import 'package:whats_app/feature/authentication/Model/UserModel.dart';
 import 'package:whats_app/feature/authentication/backend/MessageRepo/MessageRepository.dart';
 import 'package:whats_app/feature/authentication/screens/log_in_screen/log_in_screen.dart';
 import 'package:whats_app/feature/authentication/screens/verify_screen/verify_screen.dart';
@@ -20,6 +21,7 @@ import 'package:whats_app/utiles/exception/formate_exceptions.dart';
 import 'package:whats_app/utiles/exception/platform_exceptions.dart';
 import 'package:whats_app/utiles/popup/MyFullScreenLoader.dart';
 import 'package:whats_app/utiles/popup/SnackbarHepler.dart';
+import 'package:zego_uikit/zego_uikit.dart';
 
 class AuthenticationRepository extends GetxController {
   static AuthenticationRepository get instance => Get.find();
@@ -51,13 +53,10 @@ class AuthenticationRepository extends GetxController {
   @override
   Future<void> onReady() async {
     super.onReady();
-
     final user = await _auth.authStateChanges().first;
-
     if (user != null) {
       await _afterLoginInit();
     }
-
     FlutterNativeSplash.remove();
     await screenRedirect(user);
   }
@@ -303,7 +302,14 @@ class AuthenticationRepository extends GetxController {
   // Logout User
   Future<void> logoutUser() async {
     try {
+      final storage = GetStorage();
+
+      ZegoUIKit().logout();
+
       await FirebaseAuth.instance.signOut();
+
+      await storage.erase();
+
       Get.offAll(() => welcome_screen());
     } on FirebaseAuthException catch (e) {
       throw MyFirebaseAuthException(e.code).message;

@@ -27,9 +27,6 @@ class UserController extends GetxController {
   final reAuthenticate = TextEditingController();
   final otpController = TextEditingController();
 
-  // form key
-  final reAuthenticateKey = GlobalKey<FormState>();
-
   @override
   void onInit() {
     super.onInit();
@@ -109,7 +106,7 @@ class UserController extends GetxController {
       if (uid == null) return;
 
       final fetchedUser = await _userRepository.getUserById(uid);
-
+      user.refresh();
       user.value = fetchedUser!;
     } catch (e) {
       debugPrint("Failed to load user: $e");
@@ -152,10 +149,10 @@ class UserController extends GetxController {
         "isOnline": true,
         "lastActive": time,
       };
-
       await _userRepository.updateSingleField(updatedData);
       await FirebaseAuth.instance.currentUser!.updateDisplayName(finalUserName);
       await FirebaseAuth.instance.currentUser!.reload();
+      // await AuthenticationRepository.instance.cacheUser(user.value);
 
       MyFullScreenLoader.stopLoading();
       Get.offAll(() => navigationMenuScreen());
@@ -302,13 +299,6 @@ class UserController extends GetxController {
       MyFullScreenLoader.openLoadingDialog(
         "We are processing your information...",
       );
-
-      final form = reAuthenticateKey.currentState;
-      if (form == null || !form.validate()) {
-        MyFullScreenLoader.stopLoading();
-        _isSendingOtp = false;
-        return;
-      }
 
       final phoneText = reAuthenticate.text.trim();
 

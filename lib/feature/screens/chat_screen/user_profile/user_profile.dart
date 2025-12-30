@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:whats_app/common/widget/Profile_screen_widgets/Custom_profile_screen_widget.dart';
-import 'package:whats_app/common/widget/Profile_screen_widgets/Custom_profile_widget.dart';
 import 'package:whats_app/common/widget/appbar/MyAppBar.dart';
 import 'package:whats_app/common/widget/style/screen_padding.dart';
 import 'package:whats_app/data/repository/authentication_repo/AuthenticationRepo.dart';
+import 'package:whats_app/feature/authentication/screens/log_in_screen/widget/UserProfileLogo.dart';
 import 'package:whats_app/feature/personalization/controller/UserController.dart';
 import 'package:whats_app/feature/screens/chat_screen/user_profile/widgets/bottom_sheet.dart';
+import 'package:whats_app/feature/screens/chat_screen/user_profile/widgets/show_profile_in_big_screen.dart';
 import 'package:whats_app/feature/screens/chat_screen/user_profile/widgets/update_fields/delete_user/re_authenticate.dart';
 import 'package:whats_app/feature/screens/chat_screen/user_profile/widgets/update_fields/phone_number_change/first_screen.dart';
 import 'package:whats_app/feature/screens/chat_screen/user_profile/widgets/update_fields/update_about.dart';
@@ -26,7 +27,7 @@ class UserProfile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0B141A),
+      backgroundColor: Color(0xFF0B141A),
 
       appBar: MyAppbar(
         title: Text(
@@ -54,7 +55,15 @@ class UserProfile extends StatelessWidget {
           return Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              Center(child: Custom_profile_widget()),
+              Center(
+                child: GestureDetector(
+                  onTap: () {
+                    final user = controller.user.value;
+                    Get.to(() => OnScreenProfile(), arguments: user);
+                  },
+                  child: UserProfileLogo(),
+                ),
+              ),
               SizedBox(height: Mysize.sm),
 
               TextButton(

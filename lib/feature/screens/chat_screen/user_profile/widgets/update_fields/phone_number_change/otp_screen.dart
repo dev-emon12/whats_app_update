@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:iconsax/iconsax.dart';
 import 'package:pinput/pinput.dart';
 import 'package:whats_app/common/widget/appbar/MyAppBar.dart';
 import 'package:whats_app/common/widget/button/MyElevatedButton.dart';
 import 'package:whats_app/common/widget/style/screen_padding.dart';
+import 'package:whats_app/data/repository/authentication_repo/AuthenticationRepo.dart';
+import 'package:whats_app/feature/authentication/backend/Re-send_otp_controller/re_send_otp.dart';
 import 'package:whats_app/feature/personalization/controller/update_user_details/update_user_details_controller.dart';
 import 'package:whats_app/utiles/theme/const/colors.dart';
 import 'package:whats_app/utiles/theme/const/sizes.dart';
@@ -11,13 +14,18 @@ import 'package:whats_app/utiles/theme/const/text.dart';
 import 'package:whats_app/utiles/theme/helpers/helper_function.dart';
 
 class ChangeNumberOtpScreen extends StatelessWidget {
-  const ChangeNumberOtpScreen({super.key});
+  final String verificationId;
+  const ChangeNumberOtpScreen({super.key, required this.verificationId});
 
   @override
   Widget build(BuildContext context) {
     final dark = MyHelperFunction.isDarkMode(context);
-    final updateController = Get.put(UpdateUserDetailsController());
-    // verify code input box theme
+    final OtpController = Get.put(ReSendOtpController());
+
+    final controller = Get.find<UpdateUserDetailsController>();
+
+    controller.verifyId = verificationId;
+
     final defaultPinTheme = PinTheme(
       width: 55,
       height: 60,
@@ -42,36 +50,67 @@ class ChangeNumberOtpScreen extends StatelessWidget {
           style: Theme.of(context).textTheme.headlineMedium,
         ),
         showBackArrow: true,
+        actions: [
+          Obx(() {
+            return TextButton(
+              onPressed:
+                  OtpController.remainingsec.value == 0 &&
+                      !OtpController.isResend.value
+                  ? () {
+                      OtpController.resendOtp(() async {
+                        AuthenticationRepository.instance.resendOtp();
+                      }, 120);
+                    }
+                  : null,
+              child: OtpController.isResend.value
+                  ? SizedBox(
+                      height: 16,
+                      width: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : Text(
+                      OtpController.remainingsec.value == 0
+                          ? MyText.verify_phone_number_resent_text
+                          : "Resend in ${OtpController.remainingsec.value}s",
+                      style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                        color: Mycolors.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+            );
+          }),
+        ],
       ),
+
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: MyElevatedButton(
-        onPressed: () => updateController.confirmNewNumberOtp(),
+        onPressed: () => controller.confirmNewNumberOtp(),
         text: "Verify",
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
 
       body: Padding(
         padding: MyPadding.screenPadding,
         child: Column(
-          // mainAxisAlignment: MainAxisAlignment.center,
           children: [
             SizedBox(height: Mysize.defaultSpace * 3),
 
             Center(
               child: Text(
-                textAlign: TextAlign.center,
                 MyText.changeNumberOtpScreenText,
+                textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.titleLarge!.copyWith(
                   color: dark ? Mycolors.light : Mycolors.dark,
                 ),
               ),
             ),
+
             SizedBox(height: Mysize.spaceBtwInputFields * 2),
-            // verify code input box
-            Center(
+
+            Form(
+              key: controller.upDateUserOtpFormKey,
               child: Pinput(
-                key: updateController.upDateUserOtpFormKey,
                 length: 6,
-                controller: updateController.otpController,
+                controller: controller.otpController,
                 defaultPinTheme: defaultPinTheme,
                 focusedPinTheme: defaultPinTheme.copyWith(
                   decoration: BoxDecoration(
@@ -79,8 +118,10 @@ class ChangeNumberOtpScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                onCompleted: (pin) {
-                  debugPrint('Entered OTP: $pin');
+                validator: (v) {
+                  if (v == null || v.trim().length != 6)
+                    return "Enter 6 digit OTP";
+                  return null;
                 },
               ),
             ),

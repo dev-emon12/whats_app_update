@@ -33,6 +33,7 @@ class UpdateUserDetailsController extends GetxController {
   RxString fullPhone = ''.obs;
   String verifyId = '';
   bool _isSendingOtp = false;
+  int? _resendToken;
 
   @override
   void onInit() {
@@ -124,9 +125,7 @@ class UpdateUserDetailsController extends GetxController {
     _isSendingOtp = true;
 
     try {
-      MyFullScreenLoader.openLoadingDialog(
-        "We are processing your information...",
-      );
+      MyFullScreenLoader.openLoadingDialog("Sending OTP...");
 
       final form = upDateUserNumberFormKey.currentState;
       if (form == null || !form.validate()) {
@@ -136,22 +135,23 @@ class UpdateUserDetailsController extends GetxController {
       }
 
       final phone = fullPhone.value.trim().replaceAll(' ', '');
-
       if (phone.isEmpty || !phone.startsWith('+')) {
         MyFullScreenLoader.stopLoading();
         _isSendingOtp = false;
         MySnackBarHelpers.errorSnackBar(
           title: "Invalid Number",
-          message: "Please enter number with country code.",
+          message: "Use country code",
         );
         return;
       }
 
       await FirebaseAuth.instance.verifyPhoneNumber(
         phoneNumber: phone,
-        timeout: Duration(seconds: 60),
+        timeout: const Duration(seconds: 60),
 
-        verificationCompleted: (PhoneAuthCredential credential) {},
+        verificationCompleted: (PhoneAuthCredential credential) async {
+          // optional: auto verification
+        },
 
         verificationFailed: (FirebaseAuthException e) {
           MyFullScreenLoader.stopLoading();
@@ -172,9 +172,8 @@ class UpdateUserDetailsController extends GetxController {
             title: "OTP Sent",
             message: "OTP sent to $phone",
           );
-          debugPrint("Sending OTP to: ${fullPhone.value}");
 
-          Get.to(() => ChangeNumberOtpScreen());
+          Get.to(() => ChangeNumberOtpScreen(verificationId: verificationId));
         },
 
         codeAutoRetrievalTimeout: (String verificationId) {
@@ -194,6 +193,7 @@ class UpdateUserDetailsController extends GetxController {
     try {
       MyFullScreenLoader.openLoadingDialog("Verifying code...");
 
+      // validate otp form
       final form = upDateUserOtpFormKey.currentState;
       if (form == null || !form.validate()) {
         MyFullScreenLoader.stopLoading();
@@ -205,12 +205,12 @@ class UpdateUserDetailsController extends GetxController {
         MyFullScreenLoader.stopLoading();
         MySnackBarHelpers.errorSnackBar(
           title: "Invalid Code",
-          message: "Enter a valid 6-digit code.",
+          message: "Enter a valid 6-digit OTP.",
         );
         return;
       }
 
-      if (verifyId.isEmpty) {
+      if (verifyId.trim().isEmpty) {
         MyFullScreenLoader.stopLoading();
         MySnackBarHelpers.errorSnackBar(
           title: "Session Expired",
@@ -229,42 +229,56 @@ class UpdateUserDetailsController extends GetxController {
         return;
       }
 
-      //  Create credential
-      final credential = PhoneAuthProvider.credential(
-        verificationId: verifyId,
+      final newPhone = fullPhone.value.trim().replaceAll(' ', '');
+      if (newPhone.isEmpty || !newPhone.startsWith('+')) {
+        MyFullScreenLoader.stopLoading();
+        MySnackBarHelpers.errorSnackBar(
+          title: "Invalid Number",
+          message: "Use country code",
+        );
+        return;
+      }
+
+      //  create credential
+      final phoneCred = PhoneAuthProvider.credential(
+        verificationId: verifyId.trim(),
         smsCode: otp,
       );
 
-      //  update firebase auth
-      await user.updatePhoneNumber(credential);
+      // update firebase auth phone
+      await user.updatePhoneNumber(phoneCred);
 
       //  update firestore
-      final newPhone = fullPhone.value.trim();
       await userRepo.updateSingleField({"phoneNumber": newPhone});
 
-      // update local getx user
+      //  update GetX user object
       userController.user.update((u) {
         if (u == null) return;
         u.phoneNumber = newPhone;
       });
-
-      //  refresh user
       userController.user.refresh();
 
       MyFullScreenLoader.stopLoading();
 
-      // Close OTP screen
-      Get.offAll(UserProfile());
-
       MySnackBarHelpers.successSnackBar(
         title: "Success",
-        message: "Your phone number has been updated.",
+        message: "Phone number updated successfully.",
       );
+
+      Get.offAll(() => UserProfile());
     } on FirebaseAuthException catch (e) {
       MyFullScreenLoader.stopLoading();
 
+      if (e.code == "requires-recent-login") {
+        MySnackBarHelpers.errorSnackBar(
+          title: "Re-authentication required",
+          message: "Login again then try changing number.",
+        );
+        return;
+      }
+
       MySnackBarHelpers.errorSnackBar(
-        title: "Verification Failed",
+        title: "Failed",
         message: e.message ?? e.code,
       );
     } catch (e) {
