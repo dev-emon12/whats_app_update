@@ -284,6 +284,8 @@ class AuthenticationRepository extends GetxController {
       if (publicId.isNotEmpty) {
         UserRepository.instance.deleteProfilePicture(publicId);
       }
+      final storage = GetStorage();
+      storage.erase();
       await _auth.currentUser?.delete();
     } on FirebaseAuthException catch (e) {
       throw MyFirebaseAuthException(e.code).message;

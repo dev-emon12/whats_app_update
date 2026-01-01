@@ -8,6 +8,7 @@ import 'package:whats_app/feature/personalization/controller/UserController.dart
 import 'package:whats_app/feature/personalization/controller/update_user_details/update_user_details_controller.dart';
 import 'package:whats_app/utiles/theme/const/colors.dart';
 import 'package:whats_app/utiles/theme/const/sizes.dart';
+import 'package:whats_app/utiles/theme/const/text.dart';
 import 'package:whats_app/utiles/theme/helpers/helper_function.dart';
 import 'package:whats_app/utiles/validation/Validations.dart';
 
@@ -38,7 +39,7 @@ class ReAuthenticate extends StatelessWidget {
         child: Column(
           children: [
             Text(
-              "For your security, please verify your phone number before we permanently delete your account.",
+              MyText.re_authenticAboutText,
               style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                 color: isDark ? Mycolors.light : Mycolors.dark,
               ),
@@ -48,8 +49,9 @@ class ReAuthenticate extends StatelessWidget {
             TextFormField(
               readOnly: true,
               controller: upDateController.reAuthenticate,
-              validator: (value) =>
-                  MyValidator.validateEmptyText("Phone number", value),
+              // validator: (value) =>
+              //     MyValidator.validatePhoneNumber("Phone number"),
+              enabled: false,
               decoration: InputDecoration(
                 labelText: "Phone Number",
                 prefixIcon: Icon(Iconsax.call),

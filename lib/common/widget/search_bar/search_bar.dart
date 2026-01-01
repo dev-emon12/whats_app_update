@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:whats_app/utiles/theme/const/colors.dart';
 import 'package:whats_app/utiles/theme/helpers/helper_function.dart';
 
-class chat_screen_search_bar extends StatelessWidget {
-  const chat_screen_search_bar({super.key});
+class ChatScreenSearchBar extends StatelessWidget {
+  const ChatScreenSearchBar({super.key});
 
   @override
   Widget build(BuildContext context) {

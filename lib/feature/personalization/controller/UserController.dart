@@ -17,10 +17,12 @@ import 'package:whats_app/utiles/theme/const/sizes.dart';
 class UserController extends GetxController {
   static UserController get instance => Get.find();
 
-  Rx<UserModel> user = UserModel.empty().obs;
+  // repository/controller
   final _userRepository = Get.put(UserRepository());
+
   bool _isSendingOtp = false;
   String verifyId = '';
+  Rx<UserModel> user = UserModel.empty().obs;
 
   // text fields
   final userName = TextEditingController();
@@ -296,29 +298,27 @@ class UserController extends GetxController {
     _isSendingOtp = true;
 
     try {
-      MyFullScreenLoader.openLoadingDialog(
-        "We are processing your information...",
-      );
+      MyFullScreenLoader.openLoadingDialog("Sending verification code...");
 
-      final phoneText = reAuthenticate.text.trim();
+      final phone = FirebaseAuth.instance.currentUser?.phoneNumber ?? '';
 
-      if (phoneText.isEmpty) {
+      if (phone.isEmpty) {
         MyFullScreenLoader.stopLoading();
         _isSendingOtp = false;
         MySnackBarHelpers.errorSnackBar(
-          title: "Invalid Number",
-          message: "Phone number must be in a format.",
+          title: "Error",
+          message: "No phone number found for this account.",
         );
         return;
       }
 
       await FirebaseAuth.instance.verifyPhoneNumber(
-        phoneNumber: phoneText,
-        timeout: const Duration(seconds: 60),
+        phoneNumber: phone,
+        timeout: Duration(seconds: 60),
 
-        verificationCompleted: (PhoneAuthCredential credential) {},
+        verificationCompleted: (_) {},
 
-        verificationFailed: (FirebaseAuthException e) {
+        verificationFailed: (e) {
           MyFullScreenLoader.stopLoading();
           _isSendingOtp = false;
           MySnackBarHelpers.errorSnackBar(
@@ -327,46 +327,36 @@ class UserController extends GetxController {
           );
         },
 
-        codeSent: (String verificationId, int? resendToken) {
+        codeSent: (verificationId, _) {
           verifyId = verificationId;
-
-          MyFullScreenLoader.stopLoading();
           _isSendingOtp = false;
+          MyFullScreenLoader.stopLoading();
 
           MySnackBarHelpers.successSnackBar(
             title: "OTP Sent",
-            message: "OTP sent to $phoneText",
+            message: "Verification code sent",
           );
-          debugPrint("Sending OTP to: $phoneText");
 
-          //  Open otp dialog directly
           deleteAccountWarningPopup(
             title: "Delete Account",
-            middleText: "Don't share your OTP with anyone.",
+            middleText: "Enter the OTP sent to your phone.",
             content: TextFormField(
               controller: otpController,
               keyboardType: TextInputType.number,
               maxLength: 6,
-              decoration: const InputDecoration(
-                labelText: "OTP Code",
-                hintText: "Enter 6-digit OTP",
-                border: OutlineInputBorder(),
-                counterText: "",
-              ),
+              decoration: const InputDecoration(labelText: "OTP"),
             ),
-            onConfirm: () => confirmDeleteOtp(),
+            onConfirm: confirmDeleteOtp,
           );
         },
 
-        codeAutoRetrievalTimeout: (String verificationId) {
-          verifyId = verificationId;
+        codeAutoRetrievalTimeout: (id) {
+          verifyId = id;
           _isSendingOtp = false;
         },
       );
-    } catch (e) {
-      MyFullScreenLoader.stopLoading();
+    } finally {
       _isSendingOtp = false;
-      MySnackBarHelpers.errorSnackBar(title: "Failed", message: e.toString());
     }
   }
 

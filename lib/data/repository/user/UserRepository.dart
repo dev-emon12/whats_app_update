@@ -19,12 +19,15 @@ import 'package:whats_app/utiles/exception/platform_exceptions.dart';
 
 class UserRepository extends GetxController {
   static UserRepository get instance => Get.find();
-  final _Db = FirebaseFirestore.instance;
+
+  // controller/repository
   final _coludnaryServcies = Get.put(cloudinaryServices());
   final _authenticationRepository = Get.put(AuthenticationRepository());
+  final _MessageRepo = Get.put(Messagerepository());
+
   static User get user => FirebaseAuth.instance.currentUser!;
   static late UserModel me;
-  final _MessageRepo = Get.put(Messagerepository());
+  final _Db = FirebaseFirestore.instance;
 
   // Sent user details to Db
   Future<void> saveUserRecord(UserModel user) async {

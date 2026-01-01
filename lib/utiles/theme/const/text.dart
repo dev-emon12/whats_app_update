@@ -78,4 +78,8 @@ class MyText {
 
   static const String editUserEmail =
       "Your email helps us keep your account safe and lets you recover it anytime. Don’t worry — we won’t share it with anyone";
+
+  // Re-authenticate screen text
+  static const String re_authenticAboutText =
+      "For your security, please verify your phone number before we permanently delete your account.";
 }

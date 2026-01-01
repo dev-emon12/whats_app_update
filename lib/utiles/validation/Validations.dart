@@ -38,4 +38,29 @@ class MyValidator {
 
     return null;
   }
+
+  // Normalize Phone
+  static String normalizePhone(String input) {
+    var s = input.trim();
+
+    // remove spaces, dashes, brackets
+    s = s.replaceAll(RegExp(r'[\s\-\(\)]'), '');
+
+    // remove hidden iOS RTL/LTR characters
+    s = s.replaceAll(RegExp(r'[\u200E\u200F\u202A-\u202E]'), '');
+
+    // convert 00XXXXXXXX → +XXXXXXXX
+    if (s.startsWith('00')) {
+      s = '+${s.substring(2)}';
+    }
+
+    // allow only digits and +
+    s = s.replaceAll(RegExp(r'[^0-9+]'), '');
+
+    return s;
+  }
+
+  static bool isE164(String phone) {
+    return RegExp(r'^\+[1-9]\d{7,14}$').hasMatch(phone);
+  }
 }

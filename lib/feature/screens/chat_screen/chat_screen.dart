@@ -91,7 +91,7 @@ class chat_screen extends StatelessWidget {
           // search bar
           Padding(
             padding: EdgeInsets.only(left: 10, right: 10, bottom: 15, top: 20),
-            child: chat_screen_search_bar(),
+            child: ChatScreenSearchBar(),
           ),
 
           // SizedBox(height: Mysize.spaceBtwSections),

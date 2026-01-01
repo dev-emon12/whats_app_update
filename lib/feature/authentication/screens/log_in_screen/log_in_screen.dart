@@ -17,7 +17,6 @@ class Log_in_screen extends StatelessWidget {
   Widget build(BuildContext context) {
     AuthenticationRepository controller = Get.put(AuthenticationRepository());
     bool dark = MyHelperFunction.isDarkMode(context);
-    // String fullPhone = '';
     return Scaffold(
       floatingActionButton: Obx(() {
         final isEmpty = controller.fullPhone.value.isEmpty;
