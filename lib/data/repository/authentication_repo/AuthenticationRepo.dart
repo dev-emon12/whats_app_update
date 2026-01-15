@@ -68,6 +68,11 @@ class AuthenticationRepository extends GetxController {
 
   // screenRedirect
   Future<void> screenRedirect(User? user) async {
+    // bool isConnected = await NetworkManager.instance.isConnected();
+    // if (!isConnected) {
+    //   MySnackBarHelpers.errorSnackBar(title: "No Internet Connection");
+    //   return;
+    // }
     if (user != null) {
       if (user.phoneNumber != null && user.phoneNumber!.isNotEmpty) {
         await GetStorage.init(user.uid);
@@ -103,6 +108,12 @@ class AuthenticationRepository extends GetxController {
         "We are processing your information...",
       );
 
+      // bool isConnected = await NetworkManager.instance.isConnected();
+      // if (!isConnected) {
+      //   MyFullScreenLoader.stopLoading();
+      //   return;
+      // }
+
       if (!signUpKey.currentState!.validate()) {
         MyFullScreenLoader.stopLoading();
         _isSendingOtp = false;
@@ -122,6 +133,7 @@ class AuthenticationRepository extends GetxController {
             title: "Verification Failed",
             message: e.message ?? e.code,
           );
+          debugPrint("Error : $e");
         },
 
         codeSent: (String verificationId, int? resendToken) {

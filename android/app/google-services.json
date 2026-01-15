@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "949258588669",
-    "project_id": "whatsapp-5ebbf",
-    "storage_bucket": "whatsapp-5ebbf.firebasestorage.app"
+    "project_number": "926145638925",
+    "project_id": "whatsapp-43254",
+    "storage_bucket": "whatsapp-43254.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:949258588669:android:591d9a93733ebf06c2c994",
+        "mobilesdk_app_id": "1:926145638925:android:4f91e4d6fabd4f966b5b44",
         "android_client_info": {
           "package_name": "com.example.whats_app"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyC0eva38MfeLT_uZrZkctQ6v93hc_FIWzs"
+          "current_key": "AIzaSyAN06fnNMJ6tE8nchLJrwNQRN41SXv2sAs"
         }
       ],
       "services": {

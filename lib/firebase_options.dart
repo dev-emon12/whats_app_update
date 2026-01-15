@@ -50,20 +50,19 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyC0eva38MfeLT_uZrZkctQ6v93hc_FIWzs',
-    appId: '1:949258588669:android:591d9a93733ebf06c2c994',
-    messagingSenderId: '949258588669',
-    projectId: 'whatsapp-5ebbf',
-    storageBucket: 'whatsapp-5ebbf.firebasestorage.app',
+    apiKey: 'AIzaSyAN06fnNMJ6tE8nchLJrwNQRN41SXv2sAs',
+    appId: '1:926145638925:android:4f91e4d6fabd4f966b5b44',
+    messagingSenderId: '926145638925',
+    projectId: 'whatsapp-43254',
+    storageBucket: 'whatsapp-43254.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyDqU69goQX78I_kVkEPOHBBa8g4nBhMdEM',
-    appId: '1:949258588669:ios:52c6d43b6cd06e85c2c994',
-    messagingSenderId: '949258588669',
-    projectId: 'whatsapp-5ebbf',
-    storageBucket: 'whatsapp-5ebbf.firebasestorage.app',
+    apiKey: 'AIzaSyA-x6r70K11BSn22H8XR3U4y2V-ppM-tv8',
+    appId: '1:926145638925:ios:b87d08ea29376bb86b5b44',
+    messagingSenderId: '926145638925',
+    projectId: 'whatsapp-43254',
+    storageBucket: 'whatsapp-43254.firebasestorage.app',
     iosBundleId: 'com.example.whatsApp',
   );
-
 }

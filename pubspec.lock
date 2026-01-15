@@ -317,10 +317,10 @@ packages:
     dependency: transitive
     description:
       name: ffi
-      sha256: "289279317b4b16eb2bb7e271abccd4bf84ec9bdcbe999e278a94b804f5630418"
+      sha256: d07d37192dbf97461359c1518788f203b0c9102cfd2c35a716b823741219542c
       url: "https://pub.dev"
     source: hosted
-    version: "2.1.4"
+    version: "2.1.5"
   file:
     dependency: transitive
     description:
@@ -1449,10 +1449,10 @@ packages:
     dependency: transitive
     description:
       name: zego_callkit
-      sha256: "8954dcfaf94e5546fd2ebec6b0f0303dfd226d3a4c706336af6ea837011a8b37"
+      sha256: "185834bd9e6f6e6c76f33f7bf52763d27e7bcbbec07aad858a1ad48301396799"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.0+5"
+    version: "1.0.0+6"
   zego_express_engine:
     dependency: "direct main"
     description:
@@ -1497,10 +1497,10 @@ packages:
     dependency: transitive
     description:
       name: zego_zim
-      sha256: "94b7fb633c6dd4bdf204b7d2eea66774a719fd0262a263a6038ecb0e964eab4f"
+      sha256: "0fd77d03dde0765e562b65c7f33cde828334d57c46734715c4e8d68cf42ef207"
       url: "https://pub.dev"
     source: hosted
-    version: "2.25.0+1"
+    version: "2.26.0"
   zego_zpns:
     dependency: transitive
     description:

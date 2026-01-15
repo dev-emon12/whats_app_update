@@ -24,20 +24,25 @@ final navigatorKey = GlobalKey<NavigatorState>();
 StreamSubscription<User?>? _authSub;
 
 Future<void> main() async {
+  // initialize firebase
   WidgetsFlutterBinding.ensureInitialized();
   await GetStorage.init();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
+  // controller/repo
   Get.put(AuthenticationRepository(), permanent: true);
   Get.put(UserController(), permanent: true);
   Get.put(AppLifecycleService(), permanent: true);
 
+  // background handler
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
+  // notification service
   await NotificationService.instance.initLocalNotifications();
   NotificationService.instance.initFcmListeners();
   await NotificationService.instance.requestAndroidPermissionIfNeeded();
 
+  // call service for zego
   FirebaseAuth.instance.authStateChanges().listen((user) async {
     if (user == null) {
       ZegoService.instance.uninit();
@@ -53,15 +58,12 @@ Future<void> main() async {
       userName: safeName,
     );
   });
-
   _authSub = FirebaseAuth.instance.authStateChanges().listen((User? u) async {
     if (u == null) {
       ZegoService.instance.uninit();
       return;
     }
-
     final String userId = u.uid;
-
     // for ZEGO
     final String rawName = (u.displayName ?? '').trim();
     final String safeName = rawName.isNotEmpty
@@ -76,6 +78,7 @@ Future<void> main() async {
       userName: safeName,
     );
   });
+  // call service for zego end
 
   runApp(MyApp(navigatorKey: navigatorKey));
 }

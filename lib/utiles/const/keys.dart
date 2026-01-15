@@ -12,4 +12,7 @@ class MyKeys {
   static String userCollection = "users";
   static String chatCollection = "chats";
   static String messageCollection = "messages";
+
+  static String zegoAppSignInKey =
+      "6d100a52da23818ae74db2848a4e1dc0d91f09cf1842555b040626051b51ca93";
 }

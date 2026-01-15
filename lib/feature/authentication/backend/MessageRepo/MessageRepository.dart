@@ -32,11 +32,6 @@ class Messagerepository extends GetxController {
     }
   }
 
-  // Get all messages
-  // Stream<QuerySnapshot<Map<String, dynamic>>> getAllMessage() {
-  //   return _firestore.collection("message").snapshots();
-  // }
-
   // Build conversation ID between current user and another user
   static String getConversationID(String otherUserId) {
     final myId = FirebaseAuth.instance.currentUser!.uid;

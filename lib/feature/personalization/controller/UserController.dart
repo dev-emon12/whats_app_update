@@ -122,6 +122,11 @@ class UserController extends GetxController {
       MyFullScreenLoader.openLoadingDialog(
         "We are processing your information...",
       );
+      // bool isConnected = await NetworkManager.instance.isConnected();
+      // if (!isConnected) {
+      //   MyFullScreenLoader.stopLoading();
+      //   return;
+      // }
 
       final firebaseUser = FirebaseAuth.instance.currentUser;
       if (firebaseUser == null) throw Exception("No logged in user found");
@@ -165,6 +170,7 @@ class UserController extends GetxController {
         title: "Data not saved",
         message: e.toString(),
       );
+      debugPrint("Error $e");
     }
   }
 
@@ -172,7 +178,6 @@ class UserController extends GetxController {
   Future<void> updateActiveStatus(bool isOnline) async {
     try {
       final uid = FirebaseAuth.instance.currentUser!.uid;
-      debugPrint("🟢 updateActiveStatus called => isOnline=$isOnline uid=$uid");
 
       await FirebaseFirestore.instance
           .collection(MyKeys.userCollection)
@@ -181,9 +186,8 @@ class UserController extends GetxController {
             'isOnline': isOnline,
             'lastActive': FieldValue.serverTimestamp(),
           });
-      debugPrint("🟢 updateActiveStatus called => isOnline=$isOnline uid=$uid");
     } catch (e) {
-      debugPrint("❌ updateActiveStatus failed: $e");
+      debugPrint("updateActiveStatus failed: $e");
     }
   }
 
