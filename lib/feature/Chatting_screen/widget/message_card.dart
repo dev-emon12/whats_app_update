@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:whats_app/feature/authentication/backend/MessageRepo/MessageRepository.dart';
 import 'package:whats_app/utiles/theme/const/colors.dart';
 import 'package:whats_app/utiles/theme/const/sizes.dart';
@@ -14,11 +15,12 @@ class MessageCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final bool isDark = MyHelperFunction.isDarkMode(context);
 
-    //  message text
+    // message text
     final String msg = (message['message'] ?? message['msg'] ?? '').toString();
 
-    final dynamic time =
-        message['sent'] ?? message['time'] ?? message['createdAt'];
+    final int timeMs = _toMillis(
+      message['sent'] ?? message['time'] ?? message['createdAt'],
+    );
 
     final bool isSeen = (message['read'] ?? '').toString().isNotEmpty;
 
@@ -30,6 +32,7 @@ class MessageCard extends StatelessWidget {
     final bool isImage = type == 'image';
     final bool isCall = type == 'call';
 
+    // CALL fields
     final String rawCallType = (message['callType'] ?? 'audio')
         .toString()
         .toLowerCase();
@@ -56,8 +59,6 @@ class MessageCard extends StatelessWidget {
       callTitle = "Declined $callTypeLabel call";
     } else if (isCanceled) {
       callTitle = "Canceled $callTypeLabel call";
-    } else if (isEnded) {
-      callTitle = "$callTypeLabel call";
     } else {
       callTitle = "$callTypeLabel call";
     }
@@ -179,7 +180,7 @@ class MessageCard extends StatelessWidget {
                 Text(
                   Messagerepository.getFormattedTime(
                     context: context,
-                    time: time,
+                    time: timeMs.toString(),
                   ),
                   style: const TextStyle(fontSize: 11, color: Colors.white70),
                 ),
@@ -187,7 +188,7 @@ class MessageCard extends StatelessWidget {
                 Text(
                   Messagerepository.getLastMessageday(
                     context: context,
-                    time: time,
+                    time: timeMs.toString(),
                   ),
                   style: const TextStyle(fontSize: 11, color: Colors.white70),
                 ),
@@ -211,6 +212,14 @@ class MessageCard extends StatelessWidget {
     if (v is int) return v;
     if (v is double) return v.floor();
     if (v is String) return int.tryParse(v) ?? 0;
+    return 0;
+  }
+
+  int _toMillis(dynamic v) {
+    if (v == null) return 0;
+    if (v is int) return v;
+    if (v is String) return int.tryParse(v) ?? 0;
+    if (v is Timestamp) return v.millisecondsSinceEpoch;
     return 0;
   }
 

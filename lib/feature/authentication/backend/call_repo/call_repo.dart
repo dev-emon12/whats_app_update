@@ -29,37 +29,30 @@ class CallRepo {
     final doc = _db.collection("calls").doc(callId);
     final now = DateTime.now().millisecondsSinceEpoch;
 
-    await _db.runTransaction((tx) async {
-      final snap = await tx.get(doc);
+    final snap = await doc.get();
 
-      final data = <String, dynamic>{
-        "callId": callId,
-        "callerId": callerId,
-        "receiverId": receiverId,
-        "callType": callType.name,
-        "status": status.name,
-        "startedAt": startedAt,
-        "endedAt": endedAt,
-        "durationSec": durationSec ?? 0,
-        "updatedAt": now,
-      };
+    final data = <String, dynamic>{
+      "callId": callId,
+      "callerId": callerId,
+      "receiverId": receiverId,
+      "participants": [callerId, receiverId],
+      "callType": callType.name,
+      "status": status.name,
+      "startedAt": startedAt,
+      "endedAt": endedAt,
+      "durationSec": durationSec ?? 0,
+      "updatedAt": now,
+    };
 
-      if (!snap.exists) {
-        data["createdAt"] = now;
-      }
+    if (!snap.exists) data["createdAt"] = now;
 
-      final cn = _safe(callerName);
-      final cp = _safe(callerPhone);
-      final rn = _safe(receiverName);
-      final rp = _safe(receiverPhone);
+    if (_safe(callerName) != null) data["callerName"] = _safe(callerName);
+    if (_safe(callerPhone) != null) data["callerPhone"] = _safe(callerPhone);
+    if (_safe(receiverName) != null) data["receiverName"] = _safe(receiverName);
+    if (_safe(receiverPhone) != null)
+      data["receiverPhone"] = _safe(receiverPhone);
 
-      if (cn != null) data["callerName"] = cn;
-      if (cp != null) data["callerPhone"] = cp;
-      if (rn != null) data["receiverName"] = rn;
-      if (rp != null) data["receiverPhone"] = rp;
-
-      tx.set(doc, data, SetOptions(merge: true));
-    });
+    await doc.set(data, SetOptions(merge: true));
   }
 
   static String? _safe(String? v) {
@@ -82,22 +75,34 @@ class CallRepo {
         .collection("chats")
         .doc(conversationId)
         .collection("messages")
-        .doc();
+        .doc(callId);
 
-    final text = callType == CallType.audio ? "Audio call" : "Video call";
+    // message text
+    final typeLabel = callType == CallType.video ? "video" : "voice";
+    String text;
+
+    if (status == CallStatus.missed) {
+      text = "Missed $typeLabel call";
+    } else if (status == CallStatus.rejected) {
+      text = "Declined $typeLabel call";
+    } else if (status == CallStatus.canceled) {
+      text = "Canceled $typeLabel call";
+    } else {
+      text = "${typeLabel[0].toUpperCase()}${typeLabel.substring(1)} call";
+    }
 
     await ref.set({
-      "id": ref.id,
+      "id": callId,
       "type": "call",
       "callType": callType.name,
       "callStatus": status.name,
       "callId": callId,
       "fromId": fromId,
       "toId": toId,
-      "sent": timeMs.toString(),
+      "sent": timeMs,
       "durationSec": durationSec,
       "message": text,
       "read": "",
-    });
+    }, SetOptions(merge: true));
   }
 }

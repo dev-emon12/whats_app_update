@@ -20,7 +20,7 @@ class CallMessageBubble extends StatelessWidget {
         : "";
 
     final text = durationText.isEmpty
-        ? "$statusText"
+        ? statusText
         : "$statusText • $durationText";
 
     return Align(

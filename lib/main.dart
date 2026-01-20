@@ -28,7 +28,6 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await GetStorage.init();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-
   // controller/repo
   Get.put(AuthenticationRepository(), permanent: true);
   Get.put(UserController(), permanent: true);

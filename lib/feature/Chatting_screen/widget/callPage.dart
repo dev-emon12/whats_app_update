@@ -129,17 +129,14 @@ class _CallPageState extends State<CallPage> {
         config: widget.isVideoCall
             ? ZegoUIKitPrebuiltCallConfig.oneOnOneVideoCall()
             : ZegoUIKitPrebuiltCallConfig.oneOnOneVoiceCall(),
-
         events: ZegoUIKitPrebuiltCallEvents(
           user: ZegoCallUserEvents(
             onEnter: (user) async {
-              // ignore self
               if (user.id == myId) return;
-
               if (answered) return;
+
               answered = true;
               missTimer?.cancel();
-
               startedAt = DateTime.now().millisecondsSinceEpoch;
 
               await CallRepo.upsertCall(
@@ -156,12 +153,10 @@ class _CallPageState extends State<CallPage> {
               );
             },
           ),
-
           onCallEnd: (event, defaultAction) async {
             try {
               final endTime = DateTime.now().millisecondsSinceEpoch;
-
-              final int durationSec = startedAt == null
+              final durationSec = startedAt == null
                   ? 0
                   : ((endTime - startedAt!) / 1000).floor();
 
@@ -194,8 +189,6 @@ class _CallPageState extends State<CallPage> {
                 durationSec: durationSec,
                 callId: widget.callId,
               );
-            } catch (e) {
-              debugPrint("onCallEnd save error: $e");
             } finally {
               defaultAction.call();
             }
