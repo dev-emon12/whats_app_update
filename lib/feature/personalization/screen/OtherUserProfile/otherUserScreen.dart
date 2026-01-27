@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:whats_app/common/widget/ZegoCallBtn/ZegoCallBtn.dart';
 import 'package:whats_app/common/widget/appbar/MyAppBar.dart';
 import 'package:whats_app/common/widget/circular_image/MyCircularImage.dart';
 import 'package:whats_app/common/widget/style/screen_padding.dart';
+import 'package:whats_app/feature/Chatting_screen/chatting_screen.dart';
 import 'package:whats_app/feature/authentication/Model/UserModel.dart';
-import 'package:whats_app/utiles/theme/const/colors.dart';
 import 'package:whats_app/utiles/theme/const/image.dart';
 import 'package:whats_app/utiles/theme/const/sizes.dart';
 
@@ -60,33 +61,37 @@ class OtherUserProfile extends StatelessWidget {
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium!.copyWith(),
             ),
-            SizedBox(height: Mysize.spaceBtwSections * 2),
+            SizedBox(height: Mysize.spaceBtwSections * 1),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
+              // crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 // message card
-                Container(
-                  height: 75,
-                  width: 100,
-                  decoration: BoxDecoration(
-                    // color: Color.fromARGB(53, 196, 196, 196),
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(
-                      color: const Color.fromARGB(200, 98, 109, 119),
-                      width: 1.5,
+                GestureDetector(
+                  onTap: () => Get.to(ChattingScreen(), arguments: user),
+                  child: Container(
+                    height: 75,
+                    width: 100,
+                    decoration: BoxDecoration(
+                      // color: Color.fromARGB(53, 196, 196, 196),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: const Color.fromARGB(200, 98, 109, 119),
+                        width: 1.5,
+                      ),
                     ),
-                  ),
-                  child: Padding(
-                    padding: EdgeInsets.all(10.0),
-                    child: Column(
-                      children: [
-                        Icon(
-                          Iconsax.message,
-                          color: const Color.fromARGB(255, 58, 195, 65),
-                        ),
-                        SizedBox(height: Mysize.sm),
-                        Text("Message"),
-                      ],
+                    child: Padding(
+                      padding: EdgeInsets.all(10.0),
+                      child: Column(
+                        children: [
+                          Icon(
+                            Iconsax.message,
+                            color: const Color.fromARGB(255, 58, 195, 65),
+                          ),
+                          SizedBox(height: Mysize.sm),
+                          Text("Message"),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -105,14 +110,16 @@ class OtherUserProfile extends StatelessWidget {
                     ),
                   ),
                   child: Padding(
-                    padding: EdgeInsets.all(10.0),
+                    padding: const EdgeInsets.all(5.0),
                     child: Column(
                       children: [
-                        Icon(
-                          Iconsax.call,
+                        ZegoCallInvitationButton(
+                          otherUser: user,
+                          isVideo: false,
+                          icon: Iconsax.call,
                           color: const Color.fromARGB(255, 58, 195, 65),
+                          text: "audio",
                         ),
-                        SizedBox(height: Mysize.sm),
                         Text("Audio call"),
                       ],
                     ),
@@ -133,14 +140,16 @@ class OtherUserProfile extends StatelessWidget {
                     ),
                   ),
                   child: Padding(
-                    padding: EdgeInsets.all(10.0),
+                    padding: const EdgeInsets.all(5.0),
                     child: Column(
                       children: [
-                        Icon(
-                          Iconsax.video,
+                        ZegoCallInvitationButton(
+                          otherUser: user,
+                          isVideo: true,
+                          icon: Iconsax.video,
                           color: const Color.fromARGB(255, 58, 195, 65),
+                          text: 'video',
                         ),
-                        SizedBox(height: Mysize.sm),
                         Text("Video call"),
                       ],
                     ),

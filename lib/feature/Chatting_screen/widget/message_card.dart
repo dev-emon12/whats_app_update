@@ -129,7 +129,7 @@ class MessageCard extends StatelessWidget {
                         ? Colors.redAccent
                         : Colors.white,
                   ),
-                  const SizedBox(width: 8),
+                  SizedBox(width: 8),
                   Flexible(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -148,7 +148,7 @@ class MessageCard extends StatelessWidget {
                         ),
                         if (callSubtitle.isNotEmpty)
                           Padding(
-                            padding: const EdgeInsets.only(top: 2),
+                            padding: EdgeInsets.only(top: 2),
                             child: Text(
                               callSubtitle,
                               style: const TextStyle(

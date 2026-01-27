@@ -75,11 +75,11 @@ class ChattingScreen extends StatelessWidget {
                     stream: allMessage,
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(child: CircularProgressIndicator());
+                        return Center(child: CircularProgressIndicator());
                       }
 
                       if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                        return const Center(
+                        return Center(
                           child: Text("Say hi 👋, no messages yet"),
                         );
                       }

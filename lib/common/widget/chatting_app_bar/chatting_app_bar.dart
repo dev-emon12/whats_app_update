@@ -101,7 +101,7 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
                             height: 18,
                             child: Marquee(
                               text: subtitle!,
-                              style: Theme.of(context).textTheme.labelLarge!
+                              style: Theme.of(context).textTheme.labelSmall!
                                   .copyWith(
                                     color: isDark
                                         ? Mycolors.light

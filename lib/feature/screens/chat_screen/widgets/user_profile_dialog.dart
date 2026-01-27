@@ -5,6 +5,7 @@ import 'package:iconsax/iconsax.dart';
 import 'package:whats_app/common/widget/ZegoCallBtn/ZegoCallBtn.dart';
 import 'package:whats_app/feature/Chatting_screen/chatting_screen.dart';
 import 'package:whats_app/feature/authentication/Model/UserModel.dart';
+import 'package:whats_app/feature/personalization/screen/OtherUserProfile/otherUserScreen.dart';
 import 'package:whats_app/utiles/theme/const/colors.dart';
 import 'package:whats_app/utiles/theme/const/image.dart';
 import 'package:whats_app/utiles/theme/const/sizes.dart';
@@ -71,7 +72,7 @@ void showUesrDialog(context, UserModel user) {
                 size: 20,
               ),
               IconButton(
-                onPressed: () {},
+                onPressed: () => Get.to(OtherUserProfile(), arguments: user),
                 icon: Icon(Icons.error, color: Mycolors.buttonPrimary),
               ),
             ],
