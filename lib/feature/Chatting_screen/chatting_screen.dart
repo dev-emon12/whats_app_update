@@ -19,14 +19,11 @@ class ChattingScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final bool isDark = MyHelperFunction.isDarkMode(context);
 
-    // User passed from previous screen
     final UserModel otherUser = Get.arguments as UserModel;
 
-    // Controllers
     Get.put(UserController());
-    Get.put(ChatController(otherUser));
+    final chatC = Get.put(ChatController(otherUser));
 
-    // Messages stream for this chat
     final allMessage = Messagerepository.GetAllMessage(otherUser);
 
     final userStream = FirebaseFirestore.instance
@@ -56,66 +53,89 @@ class ChattingScreen extends StatelessWidget {
           lastActive: liveUser.lastActive,
         );
 
-        return Scaffold(
-          appBar: ChatAppBar(
-            name: liveUser.username,
-            subtitle: statusText,
-            avatarImage: liveUser.profilePicture.isNotEmpty
-                ? NetworkImage(liveUser.profilePicture)
-                : AssetImage(MyImage.onProfileScreen),
-            otherUser: otherUser,
-          ),
+        return Obx(
+          () => Scaffold(
+            appBar: ChatAppBar(
+              name: liveUser.username,
+              subtitle: statusText,
+              avatarImage: liveUser.profilePicture.isNotEmpty
+                  ? NetworkImage(liveUser.profilePicture)
+                  : const AssetImage(MyImage.onProfileScreen),
+              otherUser: otherUser,
 
-          body: SafeArea(
-            child: Column(
-              children: [
-                /// messages list
-                Expanded(
-                  child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-                    stream: allMessage,
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return Center(child: CircularProgressIndicator());
-                      }
+              isSelecting: chatC.isSelecting.value,
+              isSelectedImage: chatC.selectedIsImage,
+              onCancelSelection: chatC.clearSelection,
 
-                      if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                        return Center(
-                          child: Text("Say hi 👋, no messages yet"),
-                        );
-                      }
+              onEditTap: () {},
+              onCopyTap: () {},
+              onDeleteTap: () {},
+              onDownloadTap: () {},
+            ),
+            body: SafeArea(
+              child: Column(
+                children: [
+                  Expanded(
+                    child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                      stream: allMessage,
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        }
 
-                      final messages = snapshot.data!.docs;
-                      final myId = FirebaseAuth.instance.currentUser!.uid;
+                        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                          return const Center(
+                            child: Text("Say hi 👋, no messages yet"),
+                          );
+                        }
 
-                      return ListView.builder(
-                        reverse: true,
-                        itemCount: messages.length,
-                        itemBuilder: (context, index) {
-                          final doc = messages[index];
-                          final msg = doc.data();
+                        final messages = snapshot.data!.docs;
+                        final myId = FirebaseAuth.instance.currentUser!.uid;
 
-                          final myId = FirebaseAuth.instance.currentUser!.uid;
-                          final fromId = msg['fromId'];
-                          final toId = msg['toId'];
-                          final read = msg['read'] ?? '';
+                        return ListView.builder(
+                          reverse: true,
+                          itemCount: messages.length,
+                          itemBuilder: (context, index) {
+                            final doc = messages[index];
+                            final msg = doc.data();
 
-                          if (toId == myId && fromId != myId && read.isEmpty) {
-                            Messagerepository.markMessageAsRead(
-                              otherUser.id,
-                              doc.id,
+                            final fromId = msg['fromId'];
+                            final toId = msg['toId'];
+                            final read = msg['read'] ?? '';
+
+                            if (toId == myId &&
+                                fromId != myId &&
+                                read.isEmpty) {
+                              Messagerepository.markMessageAsRead(
+                                otherUser.id,
+                                doc.id,
+                              );
+                            }
+
+                            // selected highlight
+                            final bool selected =
+                                chatC.selectedDocId.value == doc.id;
+
+                            return MessageCard(
+                              message: msg,
+                              isSelected: selected,
+                              onLongPress: () {
+                                chatC.selectMessage(msg: msg, docId: doc.id);
+                              },
                             );
-                          }
-
-                          return MessageCard(message: msg);
-                        },
-                      );
-                    },
+                          },
+                        );
+                      },
+                    ),
                   ),
-                ),
 
-                // bottom input
-                Text_filed(),
-              ],
+                  // bottom input
+                  Text_filed(),
+                ],
+              ),
             ),
           ),
         );

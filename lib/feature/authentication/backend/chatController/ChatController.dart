@@ -11,12 +11,23 @@ import 'package:dio/dio.dart' as dio;
 
 class ChatController extends GetxController {
   static ChatController get instance => Get.find();
+
+  // repository
   ChatController(this.otherUser);
-  final UserModel otherUser;
-  final textController = TextEditingController();
   final _cloudinaryServicesForChat = Get.put(cloudinaryServicesForChat());
+
+  // text controller
+  final textController = TextEditingController();
+
+  // user model
+  final UserModel otherUser;
+
   final RxString message = ''.obs;
   final isSending = false.obs;
+  // in message long press
+  final RxBool isSelecting = false.obs;
+  final Rxn<Map<String, dynamic>> selectedMessage = Rxn<Map<String, dynamic>>();
+  final RxnString selectedDocId = RxnString();
 
   @override
   void onInit() {
@@ -24,6 +35,32 @@ class ChatController extends GetxController {
     textController.addListener(() {
       message.value = textController.text;
     });
+  }
+
+  // on MessageCard long press
+  void selectMessage({
+    required Map<String, dynamic> msg,
+    required String docId,
+  }) {
+    selectedMessage.value = msg;
+    selectedDocId.value = docId;
+    isSelecting.value = true;
+  }
+
+  // on AppBar close
+  void clearSelection() {
+    selectedMessage.value = null;
+    selectedDocId.value = null;
+    isSelecting.value = false;
+  }
+
+  // for AppBar button download and detele image
+  bool get selectedIsImage {
+    final type = (selectedMessage.value?['type'] ?? '')
+        .toString()
+        .trim()
+        .toLowerCase();
+    return type == 'image';
   }
 
   // sendMessage

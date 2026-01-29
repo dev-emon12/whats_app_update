@@ -16,9 +16,17 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
     required this.avatarImage,
     required this.otherUser,
     this.onBack,
-    this.onProfileTap,
     this.onMore,
     this.height = 70,
+
+    this.isSelecting = false,
+    this.isSelectedImage = false,
+    this.onCancelSelection,
+
+    this.onEditTap,
+    this.onCopyTap,
+    this.onDeleteTap,
+    this.onDownloadTap,
   });
 
   final String name;
@@ -26,9 +34,17 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
   final ImageProvider? avatarImage;
   final UserModel otherUser;
   final VoidCallback? onBack;
-  final VoidCallback? onProfileTap;
   final VoidCallback? onMore;
   final double height;
+
+  final bool isSelecting;
+  final bool isSelectedImage;
+  final VoidCallback? onCancelSelection;
+
+  final VoidCallback? onEditTap;
+  final VoidCallback? onCopyTap;
+  final VoidCallback? onDeleteTap;
+  final VoidCallback? onDownloadTap;
 
   @override
   Size get preferredSize => Size.fromHeight(height);
@@ -48,17 +64,21 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
 
       leading: IconButton(
         icon: Icon(
-          Icons.arrow_back,
+          isSelecting ? Icons.close : Icons.arrow_back,
           color: isDark ? Mycolors.light : Mycolors.dark,
         ),
-        onPressed: onBack ?? () => Navigator.pop(context),
+        onPressed: isSelecting
+            ? (onCancelSelection ?? () => Navigator.pop(context))
+            : (onBack ?? () => Navigator.pop(context)),
       ),
 
       title: InkWell(
-        onTap: () => Get.to(OtherUserProfile(), arguments: otherUser),
+        onTap: isSelecting
+            ? null
+            : () => Get.to(OtherUserProfile(), arguments: otherUser),
         borderRadius: BorderRadius.circular(12),
         child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+          padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
           child: Row(
             children: [
               CircleAvatar(
@@ -66,14 +86,14 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
                 backgroundImage:
                     avatarImage ?? const AssetImage(MyImage.onProfileScreen),
               ),
-              SizedBox(width: 10),
+              const SizedBox(width: 10),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      name,
+                      isSelecting ? "Selected" : name,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.titleLarge!.copyWith(
@@ -81,7 +101,9 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                    if (subtitle != null)
+
+                    // subtitle
+                    if (!isSelecting && subtitle != null)
                       Builder(
                         builder: (_) {
                           if (subtitle!.toLowerCase() == "online") {
@@ -124,42 +146,68 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
         ),
       ),
 
-      actions: [
-        SizedBox(
-          width: 40,
-          height: 40,
-          child: Center(
-            child: ZegoCallInvitationButton(
-              otherUser: otherUser,
-              isVideo: true,
-              icon: Icons.videocam,
-              text: 'video',
-              color: isDark ? Mycolors.light : Mycolors.textPrimary,
-            ),
-          ),
-        ),
-        SizedBox(width: 6),
-        SizedBox(
-          width: 40,
-          height: 40,
-          child: Center(
-            child: ZegoCallInvitationButton(
-              otherUser: otherUser,
-              isVideo: false,
-              icon: Icons.call,
-              text: 'audio',
-              color: isDark ? Mycolors.light : Mycolors.textPrimary,
-            ),
-          ),
-        ),
-        IconButton(
-          onPressed: onMore,
-          icon: Icon(
-            Icons.more_vert,
-            color: isDark ? Mycolors.light : Mycolors.textPrimary,
-          ),
-        ),
-      ],
+      actions: isSelecting
+          ? (isSelectedImage
+                ? [
+                    IconButton(
+                      onPressed: onDownloadTap,
+                      icon: const Icon(Icons.download),
+                    ),
+                    IconButton(
+                      onPressed: onDeleteTap,
+                      icon: const Icon(Icons.delete),
+                    ),
+                  ]
+                : [
+                    IconButton(
+                      onPressed: onEditTap,
+                      icon: const Icon(Icons.edit),
+                    ),
+                    IconButton(
+                      onPressed: onCopyTap,
+                      icon: const Icon(Icons.copy),
+                    ),
+                    IconButton(
+                      onPressed: onDeleteTap,
+                      icon: const Icon(Icons.delete),
+                    ),
+                  ])
+          : [
+              SizedBox(
+                width: 40,
+                height: 40,
+                child: Center(
+                  child: ZegoCallInvitationButton(
+                    otherUser: otherUser,
+                    isVideo: true,
+                    icon: Icons.videocam,
+                    text: 'video',
+                    color: isDark ? Mycolors.light : Mycolors.textPrimary,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 6),
+              SizedBox(
+                width: 40,
+                height: 40,
+                child: Center(
+                  child: ZegoCallInvitationButton(
+                    otherUser: otherUser,
+                    isVideo: false,
+                    icon: Icons.call,
+                    text: 'audio',
+                    color: isDark ? Mycolors.light : Mycolors.textPrimary,
+                  ),
+                ),
+              ),
+              IconButton(
+                onPressed: onMore,
+                icon: Icon(
+                  Icons.more_vert,
+                  color: isDark ? Mycolors.light : Mycolors.textPrimary,
+                ),
+              ),
+            ],
     );
   }
 }
