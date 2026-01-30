@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -18,12 +19,9 @@ class ChattingScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool isDark = MyHelperFunction.isDarkMode(context);
-
     final UserModel otherUser = Get.arguments as UserModel;
-
     Get.put(UserController());
     final chatC = Get.put(ChatController(otherUser));
-
     final allMessage = Messagerepository.GetAllMessage(otherUser);
 
     final userStream = FirebaseFirestore.instance
@@ -60,7 +58,7 @@ class ChattingScreen extends StatelessWidget {
               subtitle: statusText,
               avatarImage: liveUser.profilePicture.isNotEmpty
                   ? NetworkImage(liveUser.profilePicture)
-                  : const AssetImage(MyImage.onProfileScreen),
+                  : AssetImage(MyImage.onProfileScreen),
               otherUser: otherUser,
 
               isSelecting: chatC.isSelecting.value,
@@ -68,20 +66,75 @@ class ChattingScreen extends StatelessWidget {
               onCancelSelection: chatC.clearSelection,
 
               onEditTap: () {
+                final TextEditingController controller = TextEditingController(
+                  text: chatC.selectedMessageText.value,
+                );
+
                 UserController.instance.alertDialog(
                   title: "Update Message",
                   middleText: "Enter text to update message.",
                   content: TextFormField(
-                    keyboardType: TextInputType.number,
+                    controller: controller,
                     maxLines: 1,
-                    decoration: InputDecoration(labelText: "Message"),
+                    decoration: InputDecoration(
+                      hintText: chatC.selectedMessageText.value,
+                      labelText: "Message",
+                    ),
                   ),
-                  onConfirm: () {},
-                  btnText: 'update',
+                  onConfirm: () async {
+                    await chatC.updateMessage(
+                      otherUserId: otherUser.id,
+                      messageDocId: chatC.selectedDocId.value,
+                      newText: controller.text,
+                    );
+
+                    chatC.clearSelection();
+                    Get.back(); // close dialog
+                  },
+                  btnText: 'Update',
                 );
               },
-              onCopyTap: () {},
-              onDeleteTap: () {},
+
+              onCopyTap: () async {
+                // copy text
+                await Clipboard.setData(
+                  ClipboardData(text: chatC.selectedMessageText.value),
+                );
+                Get.snackbar(
+                  "Copied",
+                  "Message copied to clipboard",
+                  snackPosition: SnackPosition.TOP,
+                  duration: Duration(seconds: 2),
+                );
+                // debugPrint("Copied: ${chatC.selectedMessageText.value}");
+              },
+
+              onDeleteTap: () async {
+                final msg = chatC.selectedMessage.value;
+                if (msg == null) return;
+
+                try {
+                  await ChatController.deleteMessage(
+                    message: msg,
+                    otherUserId: otherUser.id,
+                  );
+                  chatC.clearSelection();
+                  Get.snackbar(
+                    "Deleted",
+                    "Message deleted",
+                    snackPosition: SnackPosition.TOP,
+                    duration: Duration(seconds: 2),
+                  );
+                } catch (e) {
+                  Get.snackbar(
+                    "Error",
+                    "Failed to delete message",
+                    snackPosition: SnackPosition.TOP,
+                    duration: Duration(seconds: 2),
+                  );
+                }
+              },
+
               onDownloadTap: () {},
             ),
             body: SafeArea(

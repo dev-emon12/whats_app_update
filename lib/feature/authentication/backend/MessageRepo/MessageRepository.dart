@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import 'package:dio/dio.dart' as dio;
 import 'package:image_picker/image_picker.dart';
 import 'package:whats_app/binding/enum.dart';
+import 'package:whats_app/data/repository/user/UserRepository.dart';
 import 'package:whats_app/feature/authentication/Model/UserModel.dart';
 import 'package:whats_app/utiles/const/keys.dart';
 import 'package:whats_app/utiles/popup/SnackbarHepler.dart';
@@ -19,7 +20,6 @@ class Messagerepository extends GetxController {
   static FirebaseMessaging fMessaging = FirebaseMessaging.instance;
   final isSending = false.obs;
   static late UserModel me;
-  // final _firestore = FirebaseFirestore.instance;
 
   // Call this after  UserModel
   Future<void> getFirebaseMessageToken() async {
@@ -91,7 +91,24 @@ class Messagerepository extends GetxController {
     final dt = _parseTime(time);
     if (dt == null) return '';
 
-    return TimeOfDay.fromDateTime(dt).format(context);
+    final now = DateTime.now();
+
+    final today = DateTime(now.year, now.month, now.day);
+    final messageDay = DateTime(dt.year, dt.month, dt.day);
+
+    final diffDays = today.difference(messageDay).inDays;
+    final timeText = TimeOfDay.fromDateTime(dt).format(context);
+
+    if (diffDays == 1) {
+      return "Yesterday, $timeText";
+    }
+    if (diffDays == 0) {
+      return timeText;
+    }
+
+    return "${dt.day.toString().padLeft(2, '0')}/"
+        "${dt.month.toString().padLeft(2, '0')}/"
+        "${dt.year}, $timeText";
   }
 
   static DateTime? _parseTime(dynamic time) {

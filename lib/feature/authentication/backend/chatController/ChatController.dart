@@ -1,8 +1,10 @@
 import 'dart:io';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:whats_app/binding/enum.dart';
+import 'package:whats_app/data/repository/user/UserRepository.dart';
 import 'package:whats_app/data/service/cloudinary_service_for_chat.dart';
 import 'package:whats_app/feature/authentication/Model/UserModel.dart';
 import 'package:whats_app/feature/authentication/backend/MessageRepo/MessageRepository.dart';
@@ -15,6 +17,7 @@ class ChatController extends GetxController {
   // repository
   ChatController(this.otherUser);
   final _cloudinaryServicesForChat = Get.put(cloudinaryServicesForChat());
+  final _userRepo = Get.put(UserRepository());
 
   // text controller
   final textController = TextEditingController();
@@ -27,7 +30,9 @@ class ChatController extends GetxController {
   // in message long press
   final RxBool isSelecting = false.obs;
   final Rxn<Map<String, dynamic>> selectedMessage = Rxn<Map<String, dynamic>>();
-  final RxnString selectedDocId = RxnString();
+  // final RxnString selectedDocId = RxnString();
+  final selectedMessageText = ''.obs;
+  final selectedDocId = ''.obs;
 
   @override
   void onInit() {
@@ -42,15 +47,17 @@ class ChatController extends GetxController {
     required Map<String, dynamic> msg,
     required String docId,
   }) {
-    selectedMessage.value = msg;
     selectedDocId.value = docId;
+    selectedMessageText.value = (msg['msg'] ?? msg['message'] ?? '')
+        .toString()
+        .trim();
     isSelecting.value = true;
   }
 
   // on AppBar close
   void clearSelection() {
     selectedMessage.value = null;
-    selectedDocId.value = null;
+    selectedDocId.value = '';
     isSelecting.value = false;
   }
 
@@ -111,6 +118,53 @@ class ChatController extends GetxController {
       uploadFn: sentPicture,
       source: ImageSource.gallery,
     );
+  }
+
+  Future<void> updateMessage({
+    required String otherUserId,
+    required String messageDocId,
+    required String newText,
+  }) async {
+    if (newText.trim().isEmpty) return;
+
+    final cid = Messagerepository.getConversationID(otherUserId);
+
+    await FirebaseFirestore.instance
+        .collection("chats")
+        .doc(cid)
+        .collection("messages")
+        .doc(messageDocId)
+        .update({
+          "msg": newText,
+          "message": newText,
+          "edited": true,
+          "updatedAt": FieldValue.serverTimestamp(),
+        });
+  }
+
+  static Future<void> deleteMessage({
+    required Map<String, dynamic> message,
+    required String otherUserId,
+  }) async {
+    final cid = Messagerepository.getConversationID(otherUserId);
+    final docId = message['docId'];
+    final type = message['type'];
+    final publicId = message['cloudinary_public_id'];
+
+    // 1️ Delete Firestore message
+    await FirebaseFirestore.instance
+        .collection("chats")
+        .doc(cid)
+        .collection("messages")
+        .doc(docId)
+        .delete();
+
+    //  Delete Cloudinary image
+    if (type == 'image' && publicId != null && publicId.toString().isNotEmpty) {
+      try {
+        await UserRepository.instance.deleteProfilePicture(publicId);
+      } catch (_) {}
+    }
   }
 
   @override

@@ -61,7 +61,7 @@ class UserRepository extends GetxController {
     }
   }
 
-  //  // Delete profile picture form cloudinary
+  //  Delete picture form cloudinary
   Future<dio.Response> deleteProfilePicture(String publicId) async {
     try {
       dio.Response response = await _coludnaryServcies.deleteImage(publicId);

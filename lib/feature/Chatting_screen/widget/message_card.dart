@@ -188,11 +188,11 @@ class MessageCard extends StatelessWidget {
                       context: context,
                       time: timeMs.toString(),
                     ),
-                    style: const TextStyle(fontSize: 11, color: Colors.white70),
+                    style: TextStyle(fontSize: 11, color: Colors.white70),
                   ),
                   SizedBox(width: Mysize.sm),
                   if (isSentByMe) ...[
-                    const SizedBox(width: 5),
+                    SizedBox(width: 5),
                     Icon(
                       Icons.done_all,
                       size: 16,
