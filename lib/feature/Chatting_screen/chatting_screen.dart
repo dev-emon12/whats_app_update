@@ -66,49 +66,13 @@ class ChattingScreen extends StatelessWidget {
               onCancelSelection: chatC.clearSelection,
 
               // Edit button
-              onEditTap: () {
-                final TextEditingController controller = TextEditingController(
-                  text: chatC.selectedMessageText.value,
-                );
-
-                UserController.instance.alertDialog(
-                  title: "Update Message",
-                  middleText: "Enter text to update message.",
-                  content: TextFormField(
-                    controller: controller,
-                    maxLines: 1,
-                    decoration: InputDecoration(
-                      hintText: chatC.selectedMessageText.value,
-                      labelText: "Message",
-                    ),
-                  ),
-                  onConfirm: () async {
-                    await chatC.updateMessage(
-                      otherUserId: otherUser.id,
-                      messageDocId: chatC.selectedDocId.value,
-                      newText: controller.text,
-                    );
-
-                    chatC.clearSelection();
-                    Get.back();
-                  },
-                  btnText: 'Update',
-                );
+              onEditTap: () async {
+                await chatC.editChat();
               },
 
               // copy button
               onCopyTap: () async {
-                // copy text
-                await Clipboard.setData(
-                  ClipboardData(text: chatC.selectedMessageText.value),
-                );
-                Get.snackbar(
-                  "Copied",
-                  "Message copied to clipboard",
-                  snackPosition: SnackPosition.TOP,
-                  duration: Duration(seconds: 2),
-                );
-                // debugPrint("Copied: ${chatC.selectedMessageText.value}");
+                await chatC.copyText();
               },
 
               // delete button
@@ -117,7 +81,9 @@ class ChattingScreen extends StatelessWidget {
               },
 
               // download button
-              onDownloadTap: () {},
+              onDownloadTap: () async {
+                await chatC.downloadImageFormChat();
+              },
             ),
             body: SafeArea(
               child: Column(

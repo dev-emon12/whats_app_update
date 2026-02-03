@@ -2,13 +2,18 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:image_downloader/image_downloader.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:whats_app/binding/enum.dart';
 import 'package:whats_app/data/repository/user/UserRepository.dart';
 import 'package:whats_app/data/service/cloudinary_service_for_chat.dart';
 import 'package:whats_app/feature/authentication/Model/UserModel.dart';
 import 'package:whats_app/feature/authentication/backend/MessageRepo/MessageRepository.dart';
+import 'package:whats_app/feature/personalization/controller/UserController.dart';
 import 'package:whats_app/utiles/const/keys.dart';
 import 'package:dio/dio.dart' as dio;
 
@@ -136,6 +141,7 @@ class ChatController extends GetxController {
     );
   }
 
+  // update Message from chat
   Future<void> updateMessage({
     required String otherUserId,
     required String messageDocId,
@@ -158,6 +164,7 @@ class ChatController extends GetxController {
         });
   }
 
+  // delete chat message
   Future<void> deleteSelectedMessage() async {
     final msg = selectedMessage.value;
     if (msg == null) {
@@ -209,6 +216,96 @@ class ChatController extends GetxController {
       // debugPrint("Delete failed: $e");
       Get.snackbar("Error", "Delete failed", snackPosition: SnackPosition.TOP);
     }
+  }
+
+  // download image from chat
+  Future<void> downloadImageFormChat() async {
+    final msg = selectedMessage.value;
+    if (msg == null) {
+      Get.snackbar("Error", "No message selected");
+      return;
+    }
+
+    final type = (msg['type'] ?? '').toString().toLowerCase();
+    final imageUrl = msg['msg'] ?? msg['message'] ?? '';
+
+    if (type != 'image' || imageUrl.isEmpty) {
+      Get.snackbar("Error", "Selected message is not an image");
+      return;
+    }
+
+    try {
+      // Ask permission for storage
+      if (Platform.isAndroid) {
+        final status = await Permission.storage.request();
+        if (!status.isGranted) {
+          Get.snackbar("Permission denied", "Cannot download image");
+          return;
+        }
+      }
+
+      // Get app directory
+      final directory = await getApplicationDocumentsDirectory();
+      final folder = Directory('${directory.path}/WhataApp');
+      if (!await folder.exists()) {
+        await folder.create(recursive: true);
+      }
+
+      // File path
+      final fileName = 'IMG_${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final filePath = '${folder.path}/$fileName';
+
+      // Download using Dio
+      await dio.Dio().download(imageUrl, filePath);
+
+      Get.snackbar("Downloaded", "Image saved to ${folder.path}");
+    } catch (e) {
+      Get.snackbar("Error", "Failed to download image");
+      debugPrint("Download failed: $e");
+    }
+  }
+
+  // copy text from chat
+  Future<void> copyText() async {
+    await Clipboard.setData(ClipboardData(text: selectedMessageText.value));
+    Get.snackbar(
+      "Copied",
+      "Message copied to clipboard",
+      snackPosition: SnackPosition.TOP,
+      duration: Duration(seconds: 2),
+    );
+    // debugPrint("Copied: ${chatC.selectedMessageText.value}");
+  }
+
+  // edit message in chat
+  Future<void> editChat() async {
+    final TextEditingController controller = TextEditingController(
+      text: selectedMessageText.value,
+    );
+
+    UserController.instance.alertDialog(
+      title: "Update Message",
+      middleText: "Enter text to update message.",
+      content: TextFormField(
+        controller: controller,
+        maxLines: 1,
+        decoration: InputDecoration(
+          hintText: selectedMessageText.value,
+          labelText: "Message",
+        ),
+      ),
+      onConfirm: () async {
+        await updateMessage(
+          otherUserId: otherUser.id,
+          messageDocId: selectedDocId.value,
+          newText: controller.text,
+        );
+
+        clearSelection();
+        Get.back();
+      },
+      btnText: 'Update',
+    );
   }
 
   @override

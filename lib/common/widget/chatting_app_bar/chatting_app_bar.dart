@@ -79,7 +79,7 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
             : () => Get.to(OtherUserProfile(), arguments: otherUser),
         borderRadius: BorderRadius.circular(12),
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+          padding: EdgeInsets.symmetric(vertical: 6, horizontal: 4),
           child: Row(
             children: [
               CircleAvatar(
@@ -87,7 +87,7 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
                 backgroundImage:
                     avatarImage ?? const AssetImage(MyImage.onProfileScreen),
               ),
-              const SizedBox(width: 10),
+              SizedBox(width: 10),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -132,9 +132,9 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
                                   ),
                               blankSpace: 30,
                               velocity: 20,
-                              pauseAfterRound: const Duration(seconds: 2),
+                              pauseAfterRound: Duration(seconds: 2),
                               numberOfRounds: 2,
-                              startAfter: const Duration(milliseconds: 300),
+                              startAfter: Duration(milliseconds: 300),
                             ),
                           );
                         },
