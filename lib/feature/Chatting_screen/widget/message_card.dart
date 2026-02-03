@@ -135,7 +135,7 @@ class MessageCard extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(callIcon, size: 18, color: callColor),
-                    const SizedBox(width: 8),
+                    SizedBox(width: 8),
                     Flexible(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -178,7 +178,7 @@ class MessageCard extends StatelessWidget {
                   ),
                 ),
 
-              const SizedBox(height: 4),
+              SizedBox(height: 4),
 
               Row(
                 mainAxisSize: MainAxisSize.min,

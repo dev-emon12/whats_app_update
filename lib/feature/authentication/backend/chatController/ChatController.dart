@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
@@ -30,7 +31,6 @@ class ChatController extends GetxController {
   // in message long press
   final RxBool isSelecting = false.obs;
   final Rxn<Map<String, dynamic>> selectedMessage = Rxn<Map<String, dynamic>>();
-  // final RxnString selectedDocId = RxnString();
   final selectedMessageText = ''.obs;
   final selectedDocId = ''.obs;
 
@@ -47,10 +47,26 @@ class ChatController extends GetxController {
     required Map<String, dynamic> msg,
     required String docId,
   }) {
+    final myId = FirebaseAuth.instance.currentUser!.uid;
+    final fromId = (msg['fromId'] ?? '').toString();
+
+    if (fromId != myId) {
+      // Other user's message: disable editing
+      selectedMessage.value = {
+        ...msg,
+        'docId': docId,
+        'canEdit': false, // mark editable false
+      };
+    } else {
+      selectedMessage.value = {
+        ...msg,
+        'docId': docId,
+        'canEdit': true, // my message: editable
+      };
+    }
+
+    selectedMessageText.value = (msg['msg'] ?? msg['message'] ?? '').toString();
     selectedDocId.value = docId;
-    selectedMessageText.value = (msg['msg'] ?? msg['message'] ?? '')
-        .toString()
-        .trim();
     isSelecting.value = true;
   }
 
@@ -142,28 +158,56 @@ class ChatController extends GetxController {
         });
   }
 
-  static Future<void> deleteMessage({
-    required Map<String, dynamic> message,
-    required String otherUserId,
-  }) async {
-    final cid = Messagerepository.getConversationID(otherUserId);
-    final docId = message['docId'];
-    final type = message['type'];
-    final publicId = message['cloudinary_public_id'];
+  Future<void> deleteSelectedMessage() async {
+    final msg = selectedMessage.value;
+    if (msg == null) {
+      Get.snackbar(
+        "Select a message",
+        "Long-press a message first",
+        snackPosition: SnackPosition.TOP,
+      );
+      return;
+    }
 
-    // 1️ Delete Firestore message
-    await FirebaseFirestore.instance
-        .collection("chats")
-        .doc(cid)
-        .collection("messages")
-        .doc(docId)
-        .delete();
+    final docId = msg['docId']?.toString();
+    if (docId == null) {
+      Get.snackbar(
+        "Error",
+        "Missing message id",
+        snackPosition: SnackPosition.TOP,
+      );
+      return;
+    }
 
-    //  Delete Cloudinary image
-    if (type == 'image' && publicId != null && publicId.toString().isNotEmpty) {
-      try {
-        await UserRepository.instance.deleteProfilePicture(publicId);
-      } catch (_) {}
+    final cid = Messagerepository.getConversationID(otherUser.id);
+
+    try {
+      // Delete Firestore
+      await FirebaseFirestore.instance
+          .collection('chats')
+          .doc(cid)
+          .collection('messages')
+          .doc(docId)
+          .delete();
+
+      // Delete image
+      if ((msg['type'] ?? '').toString().toLowerCase() == 'image') {
+        final publicId = msg['cloudinary_public_id']?.toString();
+        if (publicId != null && publicId.isNotEmpty) {
+          await _cloudinaryServicesForChat.deleteImage(publicId);
+        }
+      }
+
+      clearSelection();
+      Get.snackbar(
+        "Deleted",
+        "Message deleted successfully",
+        snackPosition: SnackPosition.TOP,
+        duration: Duration(seconds: 2),
+      );
+    } catch (e) {
+      // debugPrint("Delete failed: $e");
+      Get.snackbar("Error", "Delete failed", snackPosition: SnackPosition.TOP);
     }
   }
 

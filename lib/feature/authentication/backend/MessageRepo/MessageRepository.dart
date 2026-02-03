@@ -7,7 +7,6 @@ import 'package:get/get.dart';
 import 'package:dio/dio.dart' as dio;
 import 'package:image_picker/image_picker.dart';
 import 'package:whats_app/binding/enum.dart';
-import 'package:whats_app/data/repository/user/UserRepository.dart';
 import 'package:whats_app/feature/authentication/Model/UserModel.dart';
 import 'package:whats_app/utiles/const/keys.dart';
 import 'package:whats_app/utiles/popup/SnackbarHepler.dart';
@@ -155,11 +154,9 @@ class Messagerepository extends GetxController {
     if (diff == 0) return 'Today';
     if (diff == 1) return 'Yesterday';
     if (diff < 7 && diff > 1) {
-      // Mon, Tue, ...
       const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
       return weekdays[dt.weekday - 1];
     }
-    // dd/MM/yy
     return '${dt.day.toString().padLeft(2, '0')}/'
         '${dt.month.toString().padLeft(2, '0')}/'
         '${dt.year.toString().substring(2)}';

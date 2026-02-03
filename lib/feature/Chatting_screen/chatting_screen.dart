@@ -65,6 +65,7 @@ class ChattingScreen extends StatelessWidget {
               isSelectedImage: chatC.selectedIsImage,
               onCancelSelection: chatC.clearSelection,
 
+              // Edit button
               onEditTap: () {
                 final TextEditingController controller = TextEditingController(
                   text: chatC.selectedMessageText.value,
@@ -89,12 +90,13 @@ class ChattingScreen extends StatelessWidget {
                     );
 
                     chatC.clearSelection();
-                    Get.back(); // close dialog
+                    Get.back();
                   },
                   btnText: 'Update',
                 );
               },
 
+              // copy button
               onCopyTap: () async {
                 // copy text
                 await Clipboard.setData(
@@ -109,32 +111,12 @@ class ChattingScreen extends StatelessWidget {
                 // debugPrint("Copied: ${chatC.selectedMessageText.value}");
               },
 
+              // delete button
               onDeleteTap: () async {
-                final msg = chatC.selectedMessage.value;
-                if (msg == null) return;
-
-                try {
-                  await ChatController.deleteMessage(
-                    message: msg,
-                    otherUserId: otherUser.id,
-                  );
-                  chatC.clearSelection();
-                  Get.snackbar(
-                    "Deleted",
-                    "Message deleted",
-                    snackPosition: SnackPosition.TOP,
-                    duration: Duration(seconds: 2),
-                  );
-                } catch (e) {
-                  Get.snackbar(
-                    "Error",
-                    "Failed to delete message",
-                    snackPosition: SnackPosition.TOP,
-                    duration: Duration(seconds: 2),
-                  );
-                }
+                await chatC.deleteSelectedMessage();
               },
 
+              // download button
               onDownloadTap: () {},
             ),
             body: SafeArea(
@@ -179,16 +161,14 @@ class ChattingScreen extends StatelessWidget {
                                 doc.id,
                               );
                             }
-
-                            // selected highlight
-                            final bool selected =
-                                chatC.selectedDocId.value == doc.id;
-
                             return MessageCard(
                               message: msg,
-                              isSelected: selected,
+                              isSelected: chatC.selectedDocId.value == doc.id,
                               onLongPress: () {
-                                chatC.selectMessage(msg: msg, docId: doc.id);
+                                chatC.selectMessage(
+                                  msg: {...msg, 'docId': doc.id},
+                                  docId: doc.id,
+                                );
                               },
                             );
                           },

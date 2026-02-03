@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:marquee/marquee.dart';
 import 'package:whats_app/common/widget/ZegoCallBtn/ZegoCallBtn.dart';
 import 'package:whats_app/feature/authentication/Model/UserModel.dart';
+import 'package:whats_app/feature/authentication/backend/chatController/ChatController.dart';
 import 'package:whats_app/feature/personalization/screen/OtherUserProfile/otherUserScreen.dart';
 import 'package:whats_app/utiles/theme/const/colors.dart';
 import 'package:whats_app/utiles/theme/const/image.dart';
@@ -151,25 +152,23 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
                 ? [
                     IconButton(
                       onPressed: onDownloadTap,
-                      icon: const Icon(Icons.download),
+                      icon: Icon(Icons.download),
                     ),
                     IconButton(
                       onPressed: onDeleteTap,
-                      icon: const Icon(Icons.delete),
+                      icon: Icon(Icons.delete),
                     ),
                   ]
                 : [
-                    IconButton(
-                      onPressed: onEditTap,
-                      icon: const Icon(Icons.edit),
-                    ),
-                    IconButton(
-                      onPressed: onCopyTap,
-                      icon: const Icon(Icons.copy),
-                    ),
+                    if ((Get.find<ChatController>()
+                            .selectedMessage
+                            .value?['canEdit'] ??
+                        false))
+                      IconButton(onPressed: onEditTap, icon: Icon(Icons.edit)),
+                    IconButton(onPressed: onCopyTap, icon: Icon(Icons.copy)),
                     IconButton(
                       onPressed: onDeleteTap,
-                      icon: const Icon(Icons.delete),
+                      icon: Icon(Icons.delete),
                     ),
                   ])
           : [
@@ -186,7 +185,7 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
                   ),
                 ),
               ),
-              const SizedBox(width: 6),
+              SizedBox(width: 6),
               SizedBox(
                 width: 40,
                 height: 40,
