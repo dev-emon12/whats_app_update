@@ -40,75 +40,19 @@ class MessageCard extends StatelessWidget {
     final bool isSeen = (message['read'] ?? '').toString().isNotEmpty;
     final bool isImage = type == 'image';
 
-    final bool isCall =
-        type == 'call' ||
-        message['callId'] != null ||
-        message['callType'] != null ||
-        message['callStatus'] != null;
-
-    // CALL FIELDS
-    final String rawCallType =
-        (message['callType'] ?? message['call_type'] ?? 'audio')
-            .toString()
-            .trim()
-            .toLowerCase();
-
-    final bool isVideo = rawCallType == 'video';
-    final String callTypeLabel = isVideo ? "Video" : "Voice";
-
-    final String callStatus = (message['callStatus'] ?? message['status'] ?? '')
-        .toString()
-        .trim()
-        .toLowerCase();
-
-    final int durationSec = _toInt(
-      message['durationSec'] ?? message['duration'],
-    );
-
-    final bool isMissed = callStatus == 'missed';
-    final bool isRejected = callStatus == 'rejected';
-    final bool isCanceled = callStatus == 'canceled';
-    final bool isAnswered = callStatus == 'answered';
-    final bool isEnded = callStatus == 'ended' || isAnswered;
-
-    final IconData callIcon = isVideo ? Icons.videocam : Icons.call;
-
-    String callTitle;
-    Color callColor;
-
-    if (isMissed) {
-      callTitle = "Missed $callTypeLabel call";
-      callColor = Colors.redAccent;
-    } else if (isRejected) {
-      callTitle = "Declined $callTypeLabel call";
-      callColor = Colors.redAccent;
-    } else if (isCanceled) {
-      callTitle = "Canceled $callTypeLabel call";
-      callColor = Colors.white;
-    } else {
-      callTitle = "$callTypeLabel call";
-      callColor = Colors.white;
-    }
-
-    final String callSub = (isEnded && durationSec > 0)
-        ? _formatDurationClock(durationSec)
-        : "";
-
     final Color bubbleColor = isSelected
-        ? Colors.blueGrey
-        : (isSentByMe
-              ? Color.fromARGB(255, 119, 170, 122)
-              : Color.fromARGB(255, 79, 76, 76));
+        ? const Color.fromARGB(184, 144, 35, 35)
+        : (isSentByMe ? Mycolors.success : Color.fromARGB(255, 79, 76, 76));
 
     return Align(
       alignment: isSentByMe ? Alignment.centerRight : Alignment.centerLeft,
       child: GestureDetector(
         onLongPress: onLongPress,
         child: Container(
-          margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          margin: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
           padding: EdgeInsets.symmetric(
-            vertical: (isImage || isCall) ? 8 : 10,
-            horizontal: (isImage || isCall) ? 10 : 14,
+            vertical: isImage ? 8 : 10,
+            horizontal: isImage ? 10 : 14,
           ),
           decoration: BoxDecoration(
             color: bubbleColor,
@@ -135,45 +79,6 @@ class MessageCard extends StatelessWidget {
                     errorBuilder: (_, __, ___) =>
                         Icon(Icons.broken_image, color: Colors.white70),
                   ),
-                )
-              else if (isCall)
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(callIcon, size: 18, color: callColor),
-                    SizedBox(width: 8),
-                    Flexible(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            callTitle,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context).textTheme.titleMedium
-                                ?.copyWith(
-                                  color: Mycolors.light,
-                                  fontSize: 15,
-                                  fontWeight: (isMissed || isRejected)
-                                      ? FontWeight.w700
-                                      : FontWeight.w500,
-                                ),
-                          ),
-                          if (callSub.isNotEmpty)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 2),
-                              child: Text(
-                                callSub,
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.white70,
-                                ),
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                  ],
                 )
               else
                 Text(
@@ -214,23 +119,10 @@ class MessageCard extends StatelessWidget {
     );
   }
 
-  int _toInt(dynamic v) {
-    if (v == null) return 0;
-    if (v is int) return v;
-    if (v is double) return v.floor();
-    return int.tryParse(v.toString()) ?? 0;
-  }
-
   int _toMillis(dynamic v) {
     if (v == null) return 0;
     if (v is int) return v;
     if (v is Timestamp) return v.millisecondsSinceEpoch;
     return int.tryParse(v.toString()) ?? 0;
-  }
-
-  String _formatDurationClock(int seconds) {
-    final m = seconds ~/ 60;
-    final s = seconds % 60;
-    return "${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}";
   }
 }

@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 import 'package:whats_app/binding/enum.dart';
 import 'package:whats_app/feature/authentication/backend/call_repo/timeFormate.dart';
+import 'package:whats_app/utiles/const/keys.dart';
 
 class CallRepo extends GetxController {
   static CallRepo get instance => Get.find<CallRepo>();
@@ -14,6 +15,7 @@ class CallRepo extends GetxController {
     return s.isEmpty ? null : s;
   }
 
+  // save call status in db
   Future<void> upsertCall({
     required String callId,
     required String callerId,
@@ -28,7 +30,7 @@ class CallRepo extends GetxController {
     int? endedAt,
     int? durationSec,
   }) async {
-    final doc = _db.collection("calls").doc(callId);
+    final doc = _db.collection(MyKeys.callCollection).doc(callId);
     final now = DateTime.now().millisecondsSinceEpoch;
 
     await _db.runTransaction((tx) async {
@@ -77,41 +79,42 @@ class CallRepo extends GetxController {
     });
   }
 
-  ///  SAVE CALL AS CHAT MESSAGE FOR CHATTING SCREEN
-  Future<void> saveCallMessage({
-    required String conversationId,
-    required String fromId,
-    required String toId,
-    required AppCallType callType,
-    required AppCallStatus status,
-    required int timeMs,
-    required int durationSec,
-    required String callId,
-  }) async {
-    final ref = _db
-        .collection("chats")
-        .doc(conversationId)
-        .collection("messages")
-        .doc();
+  ///  save call status for chat screen
+  // Future<void> saveCallMessage({
+  //   required String conversationId,
+  //   required String fromId,
+  //   required String toId,
+  //   required AppCallType callType,
+  //   required AppCallStatus status,
+  //   required int timeMs,
+  //   required int durationSec,
+  //   required String callId,
+  // }) async {
 
-    await ref.set({
-      "id": ref.id,
-      "type": "call",
+  //   final ref = _db
+  //       .collection(MyKeys.chatCollection)
+  //       .doc(conversationId)
+  //       .collection('messages')
+  //       .doc();
 
-      "callType": callType.name,
-      "callStatus": status.name,
-      "callId": callId,
-      "durationSec": durationSec,
+  //   await ref.set({
+  //     "id": ref.id,
+  //     "type": "call",
 
-      "fromId": fromId,
-      "toId": toId,
+  //     "callType": callType.name,
+  //     "callStatus": status.name,
+  //     "callId": callId,
+  //     "durationSec": durationSec,
 
-      "sent": timeMs,
-      "sentText": CallFormat.timeFromMillis(timeMs),
+  //     "fromId": fromId,
+  //     "toId": toId,
 
-      "message": callType == AppCallType.audio ? "Voice call" : "Video call",
+  //     "sent": timeMs,
+  //     "sentText": CallFormat.timeFromMillis(timeMs),
 
-      "read": "",
-    });
-  }
+  //     "message": callType == AppCallType.audio ? "Voice call" : "Video call",
+
+  //     "read": "",
+  //   });
+  // }
 }

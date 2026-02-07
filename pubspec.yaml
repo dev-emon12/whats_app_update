@@ -88,13 +88,16 @@ dependencies:
 
   # zego_express_engine
   zego_express_engine: 3.22.1
-
-
+  
   # image_downloader
   # image_gallery_saver: ^1.7.1
 
   # path_provider
   path_provider: ^2.1.5
+
+  # flutter_contacts
+  flutter_contacts: ^1.1.9+2
+
 
 
 

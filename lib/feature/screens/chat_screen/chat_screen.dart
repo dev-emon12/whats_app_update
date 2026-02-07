@@ -6,6 +6,7 @@ import 'package:whats_app/common/widget/appbar/MyAppBar.dart';
 import 'package:whats_app/common/widget/search_bar/search_bar.dart';
 import 'package:whats_app/data/repository/user/UserRepository.dart';
 import 'package:whats_app/feature/authentication/backend/chat_list_controller/chatListController.dart';
+import 'package:whats_app/feature/screens/add_user_screen/find_user.dart';
 import 'package:whats_app/feature/screens/chat_screen/user_profile/user_profile.dart';
 import 'package:whats_app/feature/screens/chat_screen/widgets/chat_list.dart';
 import 'package:whats_app/utiles/CameraAccess/CameraAccess.dart';
@@ -86,7 +87,7 @@ class ChatScreen extends StatelessWidget {
         height: Mysize.floatingButtonHeight,
         width: Mysize.anotherfloatingButtonWidth,
         child: ElevatedButton(
-          onPressed: () {},
+          onPressed: () => Get.to(FindUser()),
           style: ElevatedButton.styleFrom(
             padding: EdgeInsets.zero,
             backgroundColor: Color.fromARGB(255, 2, 173, 65),

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:whats_app/utiles/const/keys.dart';
 import 'package:zego_uikit_prebuilt_call/zego_uikit_prebuilt_call.dart';
 import 'package:zego_uikit_signaling_plugin/zego_uikit_signaling_plugin.dart';
 import 'package:whats_app/binding/enum.dart' as enums;
@@ -52,8 +53,7 @@ class ZegoService {
 
     await ZegoUIKitPrebuiltCallInvitationService().init(
       appID: 1791254756,
-      appSign:
-          "6d100a52da23818ae74db2848a4e1dc0d91f09cf1842555b040626051b51ca93",
+      appSign: MyKeys.zegoAppSignInKey,
       userID: _myId,
       userName: _myName,
       plugins: [ZegoUIKitSignalingPlugin()],
@@ -76,8 +76,11 @@ class ZegoService {
                       .toString()
                       .trim();
 
-              final convId = (data["conversationId"] ?? "").toString().trim();
-
+              // final convId = (data["conversationId"] ?? "").toString().trim();
+              // final UserModel otherUserId = Get.arguments as UserModel;
+              // final convId = Messagerepository.getConversationID(
+              //   otherUserId as String,
+              // );
               final enums.AppCallType ct = (data["callType"] == "video")
                   ? enums.AppCallType.video
                   : enums.AppCallType.audio;
@@ -101,18 +104,19 @@ class ZegoService {
                 receiverPhone: toPhone.isEmpty ? null : toPhone,
               );
 
-              if (convId.isNotEmpty && toId.isNotEmpty) {
-                await repo.CallRepo.instance.saveCallMessage(
-                  conversationId: convId,
-                  fromId: _myId,
-                  toId: toId,
-                  callType: ct,
-                  status: enums.AppCallStatus.ringing,
-                  timeMs: DateTime.now().millisecondsSinceEpoch,
-                  durationSec: 0,
-                  callId: callID,
-                );
-              }
+              // for save to show on ui / chat screen
+              // if (convId.isNotEmpty && toId.isNotEmpty) {
+              //   await repo.CallRepo.instance.saveCallMessage(
+              //     conversationId: convId,
+              //     fromId: _myId,
+              //     toId: toId,
+              //     callType: ct,
+              //     status: enums.AppCallStatus.ringing,
+              //     timeMs: DateTime.now().millisecondsSinceEpoch,
+              //     durationSec: 0,
+              //     callId: callID,
+              //   );
+              // }
             },
 
         //  OUTGOING TIMEOUT
@@ -124,8 +128,6 @@ class ZegoService {
               (data["toId"] ?? (callees.isNotEmpty ? callees.first.id : ""))
                   .toString()
                   .trim();
-
-          final convId = (data["conversationId"] ?? "").toString().trim();
 
           final enums.AppCallType ct = isVideoCall
               ? enums.AppCallType.video
@@ -149,19 +151,6 @@ class ZegoService {
             receiverName: toName.isEmpty ? null : toName,
             receiverPhone: toPhone.isEmpty ? null : toPhone,
           );
-
-          if (convId.isNotEmpty && toId.isNotEmpty) {
-            await repo.CallRepo.instance.saveCallMessage(
-              conversationId: convId,
-              fromId: _myId,
-              toId: toId,
-              callType: ct,
-              status: enums.AppCallStatus.missed,
-              timeMs: now,
-              durationSec: 0,
-              callId: callID,
-            );
-          }
         },
 
         //  OUTGOING CANCEL BUTTON
@@ -173,7 +162,6 @@ class ZegoService {
           final data = _callData[callID] ?? {};
 
           final toId = (data["toId"] ?? "").toString().trim();
-          final convId = (data["conversationId"] ?? "").toString().trim();
 
           final bool isVideo = (data["callType"] ?? "audio") == "video";
           final enums.AppCallType ct = isVideo
@@ -198,19 +186,6 @@ class ZegoService {
             receiverName: toName.isEmpty ? null : toName,
             receiverPhone: toPhone.isEmpty ? null : toPhone,
           );
-
-          if (convId.isNotEmpty && toId.isNotEmpty) {
-            await repo.CallRepo.instance.saveCallMessage(
-              conversationId: convId,
-              fromId: _myId,
-              toId: toId,
-              callType: ct,
-              status: enums.AppCallStatus.canceled,
-              timeMs: now,
-              durationSec: 0,
-              callId: callID,
-            );
-          }
         },
 
         //  INCOMING CANCELED
@@ -221,7 +196,7 @@ class ZegoService {
           _callData[callID] = data;
 
           final fromId = (data["fromId"] ?? caller.id).toString().trim();
-          final convId = (data["conversationId"] ?? "").toString().trim();
+          // final convId = (data["conversationId"] ?? "").toString().trim();
 
           final isVideo =
               (data["callType"]?.toString().toLowerCase() == "video");
@@ -245,19 +220,6 @@ class ZegoService {
             receiverName: _myName,
             receiverPhone: _myPhone.isEmpty ? null : _myPhone,
           );
-
-          if (convId.isNotEmpty && fromId.isNotEmpty) {
-            await repo.CallRepo.instance.saveCallMessage(
-              conversationId: convId,
-              fromId: fromId,
-              toId: _myId,
-              callType: ct,
-              status: enums.AppCallStatus.canceled,
-              timeMs: now,
-              durationSec: 0,
-              callId: callID,
-            );
-          }
         },
       ),
     );

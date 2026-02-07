@@ -9,6 +9,7 @@ import 'package:whats_app/feature/authentication/Model/UserModel.dart';
 import 'package:whats_app/feature/authentication/backend/MessageRepo/MessageRepository.dart';
 import 'package:whats_app/feature/authentication/backend/chatController/ChatController.dart';
 import 'package:whats_app/feature/personalization/controller/UserController.dart';
+import 'package:whats_app/utiles/const/keys.dart';
 import 'package:whats_app/utiles/theme/const/image.dart';
 import 'package:whats_app/utiles/theme/helpers/helper_function.dart';
 
@@ -24,7 +25,7 @@ class ChattingScreen extends StatelessWidget {
     final allMessage = Messagerepository.GetAllMessage(otherUser);
 
     final userStream = FirebaseFirestore.instance
-        .collection('users')
+        .collection(MyKeys.userCollection)
         .doc(otherUser.id)
         .snapshots();
 
@@ -32,9 +33,7 @@ class ChattingScreen extends StatelessWidget {
       stream: userStream,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
+          return Scaffold(body: Center(child: CircularProgressIndicator()));
         }
 
         UserModel liveUser;

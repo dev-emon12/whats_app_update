@@ -107,7 +107,7 @@ class Text_filed extends GetView<ChatController> {
                   height: 50,
                   width: 50,
                   decoration: BoxDecoration(
-                    color: Colors.green,
+                    color: Mycolors.success,
                     shape: BoxShape.circle,
                   ),
                   child: controller.isSending.value
