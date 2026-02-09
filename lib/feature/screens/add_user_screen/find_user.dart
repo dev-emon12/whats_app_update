@@ -3,6 +3,9 @@ import 'package:get/get.dart';
 import 'package:whats_app/common/widget/appbar/MyAppBar.dart';
 import 'package:whats_app/feature/Chatting_screen/chatting_screen.dart';
 import 'package:whats_app/feature/authentication/backend/find_user/find_user_controller.dart';
+import 'package:whats_app/utiles/theme/const/colors.dart';
+import 'package:whats_app/utiles/theme/const/image.dart';
+import 'package:whats_app/utiles/theme/const/sizes.dart';
 
 class FindUser extends StatelessWidget {
   const FindUser({super.key});
@@ -12,6 +15,7 @@ class FindUser extends StatelessWidget {
     final controller = Get.put(FindUserController());
 
     return Scaffold(
+      // appbar
       appBar: MyAppbar(
         title: Text(
           "Find user",
@@ -23,6 +27,7 @@ class FindUser extends StatelessWidget {
             icon: const Icon(Icons.refresh),
             onPressed: controller.loadAllAndFilter,
           ),
+          IconButton(onPressed: () {}, icon: Icon(Icons.group_add_rounded)),
         ],
       ),
       body: Obx(() {
@@ -31,138 +36,132 @@ class FindUser extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const CircularProgressIndicator(),
-                const SizedBox(height: 12),
+                CircularProgressIndicator(
+                  strokeWidth: 0.4,
+                  color: Mycolors.success,
+                ),
+                SizedBox(height: 12),
                 Text(controller.status.value),
               ],
             ),
           );
         }
 
-        return ListView(
-          children: [
-            // ✅ TOP: Users using this app
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
-              child: Text(
-                "Users using this app (${controller.registeredUsers.length})",
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-            ),
-
-            if (controller.registeredUsers.isEmpty)
+        return SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // USERS ON WHATSAPP
               Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 10,
+                padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
+                child: Text(
+                  "Contacts on WhatsApp (${controller.registeredUsers.length})",
+                  style: Theme.of(context).textTheme.titleMedium,
                 ),
-                child: Text(controller.status.value),
-              )
-            else
-              SizedBox(
-                height: 92,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  itemCount: controller.registeredUsers.length,
-                  separatorBuilder: (_, __) => const SizedBox(width: 12),
-                  itemBuilder: (context, index) {
-                    final u = controller.registeredUsers[index];
-                    final name = u.username.isEmpty ? "Unknown" : u.username;
+              ),
 
-                    return InkWell(
+              if (controller.registeredUsers.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 10,
+                  ),
+                  child: Text(controller.status.value),
+                )
+              else
+                ListView.separated(
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  padding: EdgeInsets.symmetric(horizontal: 16),
+                  itemCount: controller.registeredUsers.length,
+                  separatorBuilder: (_, __) => SizedBox(height: Mysize.sm),
+                  itemBuilder: (context, index) {
+                    final users = controller.registeredUsers[index];
+                    final name = users.username.isEmpty
+                        ? "Unknown"
+                        : users.username;
+
+                    return ListTile(
                       onTap: () {
-                        Get.to(() => const ChattingScreen(), arguments: u);
+                        Get.to(() => ChattingScreen(), arguments: users);
                       },
-                      child: Container(
-                        width: 140,
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(12),
-                          color: Colors.black12,
-                        ),
-                        child: Row(
-                          children: [
-                            CircleAvatar(
-                              child: Text(
-                                name.isNotEmpty ? name[0].toUpperCase() : "?",
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Text(
-                                name,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
-                        ),
+                      leading: CircleAvatar(
+                        radius: 24,
+                        backgroundImage: users.profilePicture.isNotEmpty
+                            ? NetworkImage(users.profilePicture)
+                            : AssetImage(MyImage.onProfileScreen)
+                                  as ImageProvider,
+                      ),
+                      title: Text(
+                        name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      subtitle: Text(
+                        users.about,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     );
                   },
                 ),
-              ),
 
-            const SizedBox(height: 14),
-            const Divider(height: 1),
+              SizedBox(height: 16),
+              Divider(height: 1),
 
-            // ✅ FULL CONTACTS LIST
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
-              child: Text(
-                "All contacts (${controller.contacts.length})",
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-            ),
-
-            if (controller.contacts.isEmpty)
+              //ALL CONTACTS LIST
               Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 10,
+                padding: EdgeInsets.fromLTRB(16, 14, 16, 8),
+                child: Text(
+                  "All contacts (${controller.contacts.length})",
+                  style: Theme.of(context).textTheme.titleMedium,
                 ),
-                child: Text("No contacts found"),
-              )
-            else
-              ListView.separated(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: controller.contacts.length,
-                separatorBuilder: (_, __) => const Divider(height: 1),
-                itemBuilder: (context, index) {
-                  final contact = controller.contacts[index];
-                  final name = contact.displayName.isEmpty
-                      ? "Unknown"
-                      : contact.displayName;
-                  final phone = controller.firstPhone(contact);
-
-                  final isReg = controller.isRegisteredContact(contact);
-
-                  return ListTile(
-                    leading: CircleAvatar(
-                      child: Text(
-                        name.isNotEmpty ? name[0].toUpperCase() : "?",
-                      ),
-                    ),
-                    title: Text(name),
-                    subtitle: Text(phone.isEmpty ? "No phone number" : phone),
-                    trailing: isReg ? const Text("Registered") : const Text(""),
-                    onTap: isReg
-                        ? () {
-                            final user = controller.matchedUser(contact);
-                            if (user != null) {
-                              Get.to(
-                                () => const ChattingScreen(),
-                                arguments: user,
-                              );
-                            }
-                          }
-                        : null,
-                  );
-                },
               ),
-          ],
+
+              if (controller.contacts.isEmpty)
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  child: Text("No contacts found"),
+                )
+              else
+                ListView.separated(
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  itemCount: controller.contacts.length,
+                  separatorBuilder: (_, __) => const Divider(height: 1),
+                  itemBuilder: (context, index) {
+                    final contact = controller.contacts[index];
+                    final name = contact.displayName.isEmpty
+                        ? "Unknown"
+                        : contact.displayName;
+                    final phone = controller.firstPhone(contact);
+                    final isReg = controller.isRegisteredContact(contact);
+
+                    return ListTile(
+                      leading: CircleAvatar(
+                        child: Text(
+                          name.isNotEmpty ? name[0].toUpperCase() : "?",
+                        ),
+                      ),
+                      title: Text(name),
+                      subtitle: Text(phone.isEmpty ? "No phone number" : phone),
+                      trailing: isReg ? Text("Registered") : SizedBox(),
+                      onTap: isReg
+                          ? () {
+                              final user = controller.matchedUser(contact);
+                              if (user != null) {
+                                Get.to(() => ChattingScreen(), arguments: user);
+                              }
+                            }
+                          : null,
+                    );
+                  },
+                ),
+
+              SizedBox(height: 24),
+            ],
+          ),
         );
       }),
     );

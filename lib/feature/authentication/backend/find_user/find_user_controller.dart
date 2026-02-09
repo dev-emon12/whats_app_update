@@ -9,13 +9,13 @@ class FindUserController extends GetxController {
   final RxBool loading = false.obs;
   final RxString status = "Loading...".obs;
 
-  /// All contacts from phone
+  // All contacts from phone
   final RxList<Contact> contacts = <Contact>[].obs;
 
-  /// Users who are registered in app (Firestore users)
+  // Users who are registered in app
   final RxList<UserModel> registeredUsers = <UserModel>[].obs;
 
-  /// Phones of registered users (normalized)
+  // Phones of registered users
   final RxSet<String> registeredPhones = <String>{}.obs;
 
   @override
@@ -34,7 +34,7 @@ class FindUserController extends GetxController {
     final perm = await Permission.contacts.request();
     if (!perm.isGranted) {
       loading.value = false;
-      status.value = "Contacts permission denied.";
+      status.value = "Contacts permission denied";
       return;
     }
 
@@ -43,7 +43,6 @@ class FindUserController extends GetxController {
     list.sort((a, b) => a.displayName.compareTo(b.displayName));
     contacts.assignAll(list);
 
-    // Collect all normalized numbers from contacts
     final Set<String> phones = {};
     for (final c in list) {
       for (final p in c.phones) {
@@ -58,13 +57,12 @@ class FindUserController extends GetxController {
       return;
     }
 
-    status.value = "Finding users who use this app...";
+    status.value = "Finding users...";
 
-    // Firestore whereIn limit handling
     const chunkSize = 10;
     final phoneList = phones.toList();
 
-    final Map<String, UserModel> byPhone = {}; // phone -> user
+    final Map<String, UserModel> byPhone = {};
 
     for (int i = 0; i < phoneList.length; i += chunkSize) {
       final chunk = phoneList.sublist(
@@ -72,7 +70,6 @@ class FindUserController extends GetxController {
         (i + chunkSize > phoneList.length) ? phoneList.length : i + chunkSize,
       );
 
-      // ✅ Your DB currently uses phoneNumber
       final snap1 = await FirebaseFirestore.instance
           .collection(MyKeys.userCollection)
           .where("phoneNumber", whereIn: chunk)
@@ -88,7 +85,6 @@ class FindUserController extends GetxController {
         byPhone[p] = _userFromFirestore(data, doc.id);
       }
 
-      // ✅ Optional: if you also have `phone` in some docs
       final snap2 = await FirebaseFirestore.instance
           .collection(MyKeys.userCollection)
           .where("phone", whereIn: chunk)
@@ -111,16 +107,15 @@ class FindUserController extends GetxController {
     loading.value = false;
     status.value = registeredUsers.isEmpty
         ? "No contacts are using this app"
-        : "Found ${registeredUsers.length} users using this app";
+        : "Found ${registeredUsers.length} users";
   }
 
-  /// For UI: first phone of contact
+  ///  first phone of contact
   String firstPhone(Contact c) {
     if (c.phones.isEmpty) return "";
     return c.phones.first.number;
   }
 
-  /// For UI: check if this contact is registered
   bool isRegisteredContact(Contact c) {
     for (final p in c.phones) {
       final n = normalizeBDPhone(p.number);
@@ -129,12 +124,12 @@ class FindUserController extends GetxController {
     return false;
   }
 
-  /// Get matched registered user for a contact (for opening chat)
+  //Get matched registered user for contact
   UserModel? matchedUser(Contact c) {
     for (final p in c.phones) {
       final n = normalizeBDPhone(p.number);
       if (registeredPhones.contains(n)) {
-        // Find user by matching phoneNumber (fast)
+        // Find user for matching phoneNumber
         return registeredUsers.firstWhereOrNull(
           (u) => normalizeBDPhone(u.phoneNumber) == n,
         );
@@ -143,7 +138,7 @@ class FindUserController extends GetxController {
     return null;
   }
 
-  /// 🇧🇩 Normalize to +88017XXXXXXXX
+  // normalize number
   String normalizeBDPhone(String input) {
     if (input.isEmpty) return '';
     final digits = input.replaceAll(RegExp(r'[^0-9]'), '');
@@ -158,9 +153,8 @@ class FindUserController extends GetxController {
     return '';
   }
 
-  /// Build your existing UserModel from Firestore map
+  // UserModel from Firestore
   UserModel _userFromFirestore(Map<String, dynamic> data, String docId) {
-    // Your current UserModel uses: id, username, email, phoneNumber, ...
     return UserModel(
       id: (data["id"] ?? docId).toString(),
       username: (data["username"] ?? "").toString(),
