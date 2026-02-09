@@ -10,6 +10,7 @@ import 'package:whats_app/feature/authentication/backend/MessageRepo/MessageRepo
 import 'package:whats_app/feature/authentication/backend/chatController/ChatController.dart';
 import 'package:whats_app/feature/personalization/controller/UserController.dart';
 import 'package:whats_app/utiles/const/keys.dart';
+import 'package:whats_app/utiles/theme/const/colors.dart';
 import 'package:whats_app/utiles/theme/const/image.dart';
 import 'package:whats_app/utiles/theme/helpers/helper_function.dart';
 
@@ -33,7 +34,14 @@ class ChattingScreen extends StatelessWidget {
       stream: userStream,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Scaffold(body: Center(child: CircularProgressIndicator()));
+          return Scaffold(
+            body: Center(
+              child: CircularProgressIndicator(
+                strokeWidth: 1,
+                color: Mycolors.success,
+              ),
+            ),
+          );
         }
 
         UserModel liveUser;

@@ -59,11 +59,10 @@ class Messagerepository extends GetxController {
     UserModel user,
   ) {
     final cid = getConversationID(user.id);
-
     return FirebaseFirestore.instance
-        .collection("chats")
+        .collection(MyKeys.chatCollection)
         .doc(cid)
-        .collection("messages")
+        .collection(MyKeys.messageCollection)
         .orderBy("sent", descending: true)
         .snapshots();
   }
@@ -74,17 +73,27 @@ class Messagerepository extends GetxController {
     String msg,
     MessageType type,
   ) async {
-    final timeId = DateTime.now().millisecondsSinceEpoch.toString();
     final String currentUid = FirebaseAuth.instance.currentUser!.uid;
     final cid = getConversationID(chatUser.id);
+    final timeId = DateTime.now().millisecondsSinceEpoch.toString();
 
     final String senderName = Messagerepository.me.username;
 
-    // send message
     await FirebaseFirestore.instance
-        .collection('chats')
+        .collection(MyKeys.chatCollection)
         .doc(cid)
-        .collection('messages')
+        .set({
+          "participants": [currentUid, chatUser.id],
+          "updatedAt": FieldValue.serverTimestamp(),
+          "lastMsg": type == MessageType.image ? "📸 Image" : msg,
+          "lastType": type.name,
+        }, SetOptions(merge: true));
+
+    // Write message
+    await FirebaseFirestore.instance
+        .collection(MyKeys.chatCollection)
+        .doc(cid)
+        .collection(MyKeys.messageCollection)
         .doc(timeId)
         .set({
           'toId': chatUser.id,
@@ -102,15 +111,17 @@ class Messagerepository extends GetxController {
         .doc(chatUser.id)
         .collection('deleted_chats')
         .doc(currentUid)
-        .delete();
+        .delete()
+        .catchError((_) {});
 
-    //  restore chat for sender
+    // restore chat for sender
     await FirebaseFirestore.instance
         .collection(MyKeys.userCollection)
         .doc(currentUid)
         .collection('deleted_chats')
         .doc(chatUser.id)
-        .delete();
+        .delete()
+        .catchError((_) {});
   }
 
   // getFormattedTime

@@ -277,7 +277,7 @@ class UserController extends GetxController {
     required String btnText,
   }) async {
     Get.defaultDialog(
-      backgroundColor: const Color.fromARGB(241, 56, 142, 60),
+      backgroundColor: const Color.fromARGB(198, 115, 115, 115),
       title: title,
       contentPadding: EdgeInsets.all(Mysize.md),
       middleText: middleText ?? "",

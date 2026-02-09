@@ -5,6 +5,7 @@ import 'package:whats_app/common/widget/ZegoCallBtn/ZegoCallBtn.dart';
 import 'package:whats_app/common/widget/style/screen_padding.dart';
 import 'package:whats_app/feature/authentication/Model/UserModel.dart';
 import 'package:whats_app/feature/authentication/backend/call_repo/timeFormate.dart';
+import 'package:whats_app/utiles/theme/const/colors.dart';
 
 class Calls_list extends StatelessWidget {
   const Calls_list({super.key});
@@ -22,7 +23,12 @@ class Calls_list extends StatelessWidget {
       stream: stream,
       builder: (context, snap) {
         if (snap.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
+          return Center(
+            child: CircularProgressIndicator(
+              strokeWidth: 1,
+              color: Mycolors.success,
+            ),
+          );
         }
 
         if (snap.hasError) {

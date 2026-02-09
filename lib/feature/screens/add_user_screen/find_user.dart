@@ -37,7 +37,7 @@ class FindUser extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 CircularProgressIndicator(
-                  strokeWidth: 0.4,
+                  strokeWidth: 1,
                   color: Mycolors.success,
                 ),
                 SizedBox(height: 12),

@@ -76,4 +76,23 @@ class ChatListController extends GetxController {
       Get.snackbar("Error", "Failed to delete chat");
     }
   }
+
+  static Stream<List<String>> getMyChatUserIds(String myId) {
+    return FirebaseFirestore.instance
+        .collection(MyKeys.chatCollection)
+        .where('participants', arrayContains: myId)
+        .snapshots()
+        .map((snap) {
+          final ids = <String>{};
+          for (final doc in snap.docs) {
+            final data = doc.data();
+            final parts = (data['participants'] ?? []) as List;
+            for (final p in parts) {
+              final pid = p.toString();
+              if (pid.isNotEmpty && pid != myId) ids.add(pid);
+            }
+          }
+          return ids.toList();
+        });
+  }
 }
