@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:whats_app/common/widget/appbar/MyAppBar.dart';
 import 'package:whats_app/feature/Chatting_screen/chatting_screen.dart';
 import 'package:whats_app/feature/authentication/backend/find_user/find_user_controller.dart';
+import 'package:whats_app/feature/screens/calls_screen/widget/callBottomSheet.dart';
 import 'package:whats_app/utiles/theme/const/colors.dart';
 import 'package:whats_app/utiles/theme/const/image.dart';
 import 'package:whats_app/utiles/theme/const/sizes.dart';
@@ -24,10 +25,15 @@ class FindUser extends StatelessWidget {
         showBackArrow: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: Icon(Icons.refresh),
             onPressed: controller.loadAllAndFilter,
           ),
-          IconButton(onPressed: () {}, icon: Icon(Icons.group_add_rounded)),
+          IconButton(
+            onPressed: () {
+              CallBottomSheetHelper.open();
+            },
+            icon: Icon(Icons.group_add_rounded),
+          ),
         ],
       ),
       body: Obx(() {

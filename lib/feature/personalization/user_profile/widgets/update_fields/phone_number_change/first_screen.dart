@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import 'package:whats_app/common/widget/appbar/MyAppBar.dart';
 import 'package:whats_app/common/widget/button/MyElevatedButton.dart';
 import 'package:whats_app/common/widget/style/screen_padding.dart';
-import 'package:whats_app/feature/screens/chat_screen/user_profile/widgets/update_fields/phone_number_change/second_screen.dart';
+import 'package:whats_app/feature/personalization/user_profile/widgets/update_fields/phone_number_change/second_screen.dart';
 import 'package:whats_app/utiles/theme/const/colors.dart';
 import 'package:whats_app/utiles/theme/const/text.dart';
 import 'package:whats_app/utiles/theme/helpers/helper_function.dart';

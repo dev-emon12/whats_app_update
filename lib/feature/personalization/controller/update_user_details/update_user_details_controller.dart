@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:whats_app/data/repository/user/UserRepository.dart';
 import 'package:whats_app/feature/personalization/controller/UserController.dart';
-import 'package:whats_app/feature/screens/chat_screen/user_profile/user_profile.dart';
-import 'package:whats_app/feature/screens/chat_screen/user_profile/widgets/update_fields/phone_number_change/otp_screen.dart';
+import 'package:whats_app/feature/personalization/user_profile/user_profile.dart';
+import 'package:whats_app/feature/personalization/user_profile/widgets/update_fields/phone_number_change/otp_screen.dart';
 import 'package:whats_app/utiles/popup/MyFullScreenLoader.dart';
 import 'package:whats_app/utiles/popup/SnackbarHepler.dart';
 

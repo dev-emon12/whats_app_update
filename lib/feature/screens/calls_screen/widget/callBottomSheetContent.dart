@@ -41,7 +41,7 @@ class CallBottomSheetContent extends StatelessWidget {
             SizedBox(width: 12),
             Expanded(
               child: Text(
-                "Call by number",
+                "Find user",
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w800,
@@ -50,11 +50,7 @@ class CallBottomSheetContent extends StatelessWidget {
               ),
             ),
             IconButton(
-              onPressed: () {
-                Get.back();
-
-                CallByNumberController.instance.reset();
-              },
+              onPressed: () => Get.back(),
               icon: Icon(Icons.close_rounded, color: textSecondary),
             ),
           ],

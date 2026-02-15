@@ -7,7 +7,7 @@ import 'package:whats_app/common/widget/search_bar/search_bar.dart';
 import 'package:whats_app/data/repository/user/UserRepository.dart';
 import 'package:whats_app/feature/authentication/backend/chat_list_controller/chatListController.dart';
 import 'package:whats_app/feature/screens/add_user_screen/find_user.dart';
-import 'package:whats_app/feature/screens/chat_screen/user_profile/user_profile.dart';
+import 'package:whats_app/feature/personalization/user_profile/user_profile.dart';
 import 'package:whats_app/feature/screens/chat_screen/widgets/chat_list.dart';
 import 'package:whats_app/utiles/CameraAccess/CameraAccess.dart';
 import 'package:whats_app/utiles/theme/const/colors.dart';

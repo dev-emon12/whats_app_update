@@ -5,7 +5,7 @@ import 'package:iconsax/iconsax.dart';
 import 'package:whats_app/common/widget/appbar/MyAppBar.dart';
 import 'package:whats_app/feature/authentication/Model/UserModel.dart';
 import 'package:whats_app/feature/personalization/controller/UserController.dart';
-import 'package:whats_app/feature/screens/chat_screen/user_profile/widgets/bottom_sheet.dart';
+import 'package:whats_app/feature/personalization/user_profile/widgets/bottom_sheet.dart';
 import 'package:whats_app/utiles/theme/const/image.dart';
 
 class OnScreenProfile extends StatelessWidget {
