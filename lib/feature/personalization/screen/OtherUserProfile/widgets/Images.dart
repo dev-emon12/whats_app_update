@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:whats_app/common/widget/shimmerEffect/shimmerEffect.dart';
 import 'package:whats_app/feature/personalization/screen/OtherUserProfile/widgets/ImagePreview.dart';
 import 'package:whats_app/feature/personalization/screen/OtherUserProfile/widgets/ShimmerEffectForImage.dart';
 import 'package:whats_app/utiles/const/keys.dart';

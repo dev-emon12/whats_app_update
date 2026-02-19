@@ -416,4 +416,31 @@ class UserController extends GetxController {
   }
 
   //-------------DELETE ACCOUNT SECTION END-------------
+
+  // download user image
+  Future<void> downloadUserImage(String imageUrl) async {
+    try {
+      final directory = Directory(
+        '/storage/emulated/0/Pictures/WhatsApp Images',
+      );
+
+      if (!await directory.exists()) {
+        await directory.create(recursive: true);
+      }
+
+      final fileName = 'IMG_${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final savePath = '${directory.path}/$fileName';
+
+      await dio.Dio().download(imageUrl, savePath);
+
+      Get.snackbar(
+        "Downloaded",
+        "Image saved to Gallery",
+        snackPosition: SnackPosition.TOP,
+      );
+    } catch (e) {
+      debugPrint("Download error: $e");
+      Get.snackbar("Error", "Failed to download image");
+    }
+  }
 }

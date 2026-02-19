@@ -32,11 +32,10 @@ class OtherUserProfile extends StatelessWidget {
 
             SizedBox(height: Mysize.spaceBtwSections),
 
-            // Images
-            Container(
-              margin: EdgeInsets.only(right: 290),
+            // Images text
+            Align(
+              alignment: Alignment.centerLeft,
               child: Text(
-                textAlign: TextAlign.start,
                 MyText.imgText,
                 style: Theme.of(
                   context,

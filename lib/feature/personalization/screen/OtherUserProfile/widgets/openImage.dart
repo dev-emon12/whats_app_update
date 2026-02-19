@@ -4,22 +4,29 @@ import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:whats_app/common/widget/appbar/MyAppBar.dart';
 import 'package:whats_app/feature/authentication/Model/UserModel.dart';
+import 'package:whats_app/feature/personalization/controller/UserController.dart';
 import 'package:whats_app/utiles/theme/const/image.dart';
+import 'package:whats_app/utiles/theme/const/text.dart';
 
-class openProfile extends StatelessWidget {
-  const openProfile({super.key});
+class OpenProfile extends StatelessWidget {
+  const OpenProfile({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final userController = Get.put(UserController());
     final UserModel user = Get.arguments as UserModel;
     return Scaffold(
       appBar: MyAppbar(
         title: Text(
-          "Profile photo",
+          MyText.profilePictureHeadingText,
           style: Theme.of(context).textTheme.headlineMedium,
         ),
         actions: [
-          IconButton(onPressed: () {}, icon: Icon(Icons.download_sharp)),
+          IconButton(
+            onPressed: () =>
+                userController.downloadUserImage(user.profilePicture),
+            icon: Icon(Icons.download_sharp),
+          ),
         ],
         showBackArrow: true,
       ),

@@ -249,20 +249,20 @@ class ChatController extends GetxController {
 
   // download image from chat
   Future<void> downloadImageFromChat() async {
-    final msg = selectedMessage.value;
-
-    if (msg == null) {
-      Get.snackbar("Error", "No message selected");
-      return;
-    }
-
-    final imageUrl = msg['msg'] ?? '';
-    if (imageUrl.isEmpty) {
-      Get.snackbar("Error", "Invalid image");
-      return;
-    }
-
     try {
+      final msg = selectedMessage.value;
+
+      if (msg == null) {
+        Get.snackbar("Error", "No message selected");
+        return;
+      }
+
+      final imageUrl = msg['msg'] ?? '';
+      if (imageUrl.isEmpty) {
+        Get.snackbar("Error", "Invalid image");
+        return;
+      }
+
       final hasPermission = await _requestImagePermission();
       if (!hasPermission) {
         Get.snackbar("Permission denied", "Cannot download image");

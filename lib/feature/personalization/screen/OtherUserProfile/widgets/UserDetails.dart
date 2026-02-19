@@ -22,7 +22,7 @@ class UserDetails extends StatelessWidget {
       children: [
         // User Image
         GestureDetector(
-          onTap: () => Get.to(() => openProfile(), arguments: user),
+          onTap: () => Get.to(() => OpenProfile(), arguments: user),
           child: Hero(
             tag: user.id,
             child: MyCirculerImage(

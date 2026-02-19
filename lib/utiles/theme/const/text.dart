@@ -85,4 +85,5 @@ class MyText {
 
   // other user screen text
   static const String imgText = "Images :";
+  static const String profilePictureHeadingText = "Profile photo";
 }
