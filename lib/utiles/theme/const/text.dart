@@ -82,4 +82,7 @@ class MyText {
   // Re-authenticate screen text
   static const String re_authenticAboutText =
       "For your security, please verify your phone number before we permanently delete your account.";
+
+  // other user screen text
+  static const String imgText = "Images :";
 }

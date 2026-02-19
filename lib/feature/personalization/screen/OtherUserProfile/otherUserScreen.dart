@@ -7,6 +7,7 @@ import 'package:whats_app/feature/personalization/screen/OtherUserProfile/widget
 import 'package:whats_app/feature/personalization/screen/OtherUserProfile/widgets/UserDetails.dart';
 import 'package:whats_app/feature/personalization/screen/OtherUserProfile/widgets/card.dart';
 import 'package:whats_app/utiles/theme/const/sizes.dart';
+import 'package:whats_app/utiles/theme/const/text.dart';
 
 class OtherUserProfile extends StatelessWidget {
   const OtherUserProfile({super.key});
@@ -32,13 +33,17 @@ class OtherUserProfile extends StatelessWidget {
             SizedBox(height: Mysize.spaceBtwSections),
 
             // Images
-            Text(
-              "Images",
-              style: Theme.of(
-                context,
-              ).textTheme.titleLarge!.copyWith(fontSize: 18),
+            Container(
+              margin: EdgeInsets.only(right: 290),
+              child: Text(
+                textAlign: TextAlign.start,
+                MyText.imgText,
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge!.copyWith(fontSize: 18),
+              ),
             ),
-            SizedBox(height: 10),
+            SizedBox(height: Mysize.iconSm),
 
             // show all chat images
             ChatImages(otherUserId: otherUser.id),
