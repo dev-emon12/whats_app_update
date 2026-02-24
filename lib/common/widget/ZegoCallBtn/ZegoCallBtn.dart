@@ -5,6 +5,7 @@ import 'package:whats_app/feature/authentication/Model/UserModel.dart';
 import 'package:zego_uikit/zego_uikit.dart';
 import 'package:zego_uikit_prebuilt_call/zego_uikit_prebuilt_call.dart';
 
+// ignore: must_be_immutable
 class ZegoCallInvitationButton extends StatelessWidget {
   ZegoCallInvitationButton({
     super.key,

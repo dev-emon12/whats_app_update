@@ -1,1 +1,36 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"whatsapp-43254","appId":"1:926145638925:android:4f91e4d6fabd4f966b5b44","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"whatsapp-43254","configurations":{"android":"1:926145638925:android:4f91e4d6fabd4f966b5b44","ios":"1:926145638925:ios:b87d08ea29376bb86b5b44"}}}}}}
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "whatsapp-43254",
+          "appId": "1:926145638925:android:4f91e4d6fabd4f966b5b44",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "whatsapp-43254",
+          "configurations": {
+            "android": "1:926145638925:android:4f91e4d6fabd4f966b5b44",
+            "ios": "1:926145638925:ios:b87d08ea29376bb86b5b44"
+          }
+        }
+      }
+    }
+  },
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "default",
+      "disallowLegacyRuntimeConfig": true,
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local"
+      ]
+    }
+  ]
+}

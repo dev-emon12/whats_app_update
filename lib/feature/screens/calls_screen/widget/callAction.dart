@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:whats_app/utiles/theme/helpers/helper_function.dart';
 
-class PremiumCallAction extends StatelessWidget {
-  const PremiumCallAction({
+class CallAction extends StatelessWidget {
+  const CallAction({
     super.key,
     required this.title,
     required this.subtitle,
@@ -19,8 +19,8 @@ class PremiumCallAction extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = MyHelperFunction.isDarkMode(context);
 
-    final bg = isDark ? const Color(0xFF171A1D) : const Color(0xFFF6F7F9);
-    final textPrimary = isDark ? Colors.white : const Color(0xFF101418);
+    final bg = isDark ? const Color(0xFF171A1D) : Color(0xFFF6F7F9);
+    final textPrimary = isDark ? Colors.white : Color(0xFF101418);
     final textSecondary = isDark ? Colors.white70 : Colors.black54;
 
     return Container(

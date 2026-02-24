@@ -205,7 +205,7 @@ class CallBottomSheetContent extends StatelessWidget {
               Row(
                 children: [
                   Expanded(
-                    child: PremiumCallAction(
+                    child: CallAction(
                       title: "Audio Call",
                       subtitle: "Crystal voice",
                       icon: Icons.call_rounded,
@@ -220,7 +220,7 @@ class CallBottomSheetContent extends StatelessWidget {
                   ),
                   SizedBox(width: 12),
                   Expanded(
-                    child: PremiumCallAction(
+                    child: CallAction(
                       title: "Video Call",
                       subtitle: "HD video",
                       icon: Icons.videocam_rounded,

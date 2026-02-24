@@ -200,7 +200,8 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
                 ),
               ),
               IconButton(
-                onPressed: () => Get.to(OtherUserProfile()),
+                onPressed: () =>
+                    Get.to(OtherUserProfile(), arguments: otherUser),
                 icon: Icon(
                   Icons.more_vert,
                   color: isDark ? Mycolors.light : Mycolors.textPrimary,

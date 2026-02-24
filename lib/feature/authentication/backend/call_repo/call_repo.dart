@@ -22,13 +22,12 @@ class CallRepo extends GetxController {
     AppCallType? callType,
     AppCallStatus? status,
 
-    // ✅ duration fields
-    int? startedAt, // invitation/ringing time
-    int? connectedAt, // real call start time
+    // duration fields
+    int? startedAt,
+    int? connectedAt,
     int? endedAt,
     int? durationSec,
 
-    // (optional) identity fields
     String? receiverImage,
     String? callerImage,
     String? callerName,
@@ -70,13 +69,11 @@ class CallRepo extends GetxController {
         data["createdAtText"] = CallFormat.timeFromMillis(now);
       }
 
-      // identity (only overwrite if provided)
       if (_safe(callerId) != null) data["callerId"] = callerId;
       if (_safe(receiverId) != null) data["receiverId"] = receiverId;
       if (callType != null) data["callType"] = callType.name;
       if (status != null) data["status"] = status.name;
 
-      // participants (only if callerId & receiverId are present at least once)
       final finalCallerId = (data["callerId"] ?? old["callerId"] ?? "")
           .toString();
       final finalReceiverId = (data["receiverId"] ?? old["receiverId"] ?? "")
@@ -85,7 +82,7 @@ class CallRepo extends GetxController {
         data["participants"] = [finalCallerId, finalReceiverId];
       }
 
-      // ✅ duration fields (safe merge)
+      //  duration fields
       final int finalStartedAt =
           startedAt ?? (oldStartedAt > 0 ? oldStartedAt : now);
       data["startedAt"] = finalStartedAt;
@@ -105,7 +102,6 @@ class CallRepo extends GetxController {
       final int finalDuration = durationSec ?? oldDuration;
       data["durationSec"] = finalDuration;
 
-      // optional images/names (only overwrite if provided)
       final cImg = _safe(callerImage);
       final rImg = _safe(receiverImage);
       final cName = _safe(callerName);

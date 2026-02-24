@@ -20,14 +20,14 @@ class Messagerepository extends GetxController {
   final isSending = false.obs;
   static late UserModel me;
 
-  // Call this after  UserModel
+  // for get notification fcm token
   Future<void> getFirebaseMessageToken() async {
     await fMessaging.requestPermission();
 
     final t = await fMessaging.getToken();
     if (t != null) {
       me.pushToken = t;
-      print('FCM Token: $t');
+      // print('FCM Token: $t');
     }
   }
 
@@ -378,15 +378,15 @@ class Messagerepository extends GetxController {
   }
 
   // Save fcm token
-  // Future<void> saveFcmToken() async {
-  //   final uid = FirebaseAuth.instance.currentUser?.uid;
-  //   if (uid == null) return;
+  Future<void> saveFcmToken() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return;
 
-  //   final token = await FirebaseMessaging.instance.getToken();
-  //   if (token == null || token.isEmpty) return;
+    final token = await FirebaseMessaging.instance.getToken();
+    if (token == null || token.isEmpty) return;
 
-  //   await _firestore.collection('users').doc(uid).update({'pushToken': token});
+    await _firestore.collection('users').doc(uid).update({'pushToken': token});
 
-  //   print(" FCM token saved: $token");
-  // }
+    print(" FCM token saved: $token");
+  }
 }
