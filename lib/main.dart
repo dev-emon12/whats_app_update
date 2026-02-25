@@ -19,19 +19,10 @@ final navigatorKey = GlobalKey<NavigatorState>();
 StreamSubscription<User?>? _authSub;
 
 @pragma('vm:entry-point')
-// notification handeler
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  await NotificationService.instance.ensureInitialized();
-  final title =
-      message.data['senderName']?.toString() ??
-      message.notification?.title ??
-      'Message';
 
-  final body =
-      message.data['message']?.toString() ??
-      message.notification?.body ??
-      'New message';
+  await NotificationService.instance.ensureInitialized();
 
   final type = (message.data['type'] ?? '').toString();
 
@@ -43,38 +34,43 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
     return;
   }
 
+  final title =
+      message.data['senderName']?.toString() ??
+      message.notification?.title ??
+      'Message';
+
+  final body =
+      message.data['message']?.toString() ??
+      message.notification?.body ??
+      'New message';
+
   await NotificationService.instance.showChatNotification(
     title: title,
     body: body,
-    data: message.data.isEmpty ? null : message.data,
+    data: message.data,
   );
 }
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // initialize local storage
   await GetStorage.init();
+  // initialize firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
+  // notificaiton background handeler
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
-  // repository or controller
+  // controllers/repository
   Get.put(AuthenticationRepository(), permanent: true);
   Get.put(UserController(), permanent: true);
   Get.put(AppLifecycleService(), permanent: true);
   Get.put(CallRepo(), permanent: true);
-  // await Messagerepository.initMe();
-  await Messagerepository.instance.saveFcmToken();
-  _authSub = FirebaseAuth.instance.authStateChanges().listen((
-    User? user,
-  ) async {
-    if (user == null) return;
 
-    await Messagerepository.initMe();
-  });
-
-  // Notification init tap -> open chat
+  // notifications
   await NotificationService.instance.init(navigatorKey: navigatorKey);
 
+  // ONE auth listener
   _authSub = FirebaseAuth.instance.authStateChanges().listen((
     User? user,
   ) async {
@@ -83,6 +79,12 @@ Future<void> main() async {
       return;
     }
 
+    await Messagerepository.initMe();
+
+    //  save FCM token after login
+    await Messagerepository.instance.saveFcmToken();
+
+    // for zego call service
     final String userId = user.uid;
     final String safeName =
         (user.displayName ?? user.phoneNumber ?? "Guest").trim().isEmpty

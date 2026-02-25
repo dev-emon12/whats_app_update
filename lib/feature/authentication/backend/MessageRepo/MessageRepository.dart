@@ -73,55 +73,77 @@ class Messagerepository extends GetxController {
     String msg,
     MessageType type,
   ) async {
-    final String currentUid = FirebaseAuth.instance.currentUser!.uid;
-    final cid = getConversationID(chatUser.id);
-    final timeId = DateTime.now().millisecondsSinceEpoch.toString();
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) return;
 
-    final String senderName = Messagerepository.me.username;
+      try {
+        if (Messagerepository.me.id.isEmpty) {
+          await Messagerepository.initMe();
+        }
+      } catch (_) {
+        await Messagerepository.initMe();
+      }
 
-    await FirebaseFirestore.instance
-        .collection(MyKeys.chatCollection)
-        .doc(cid)
-        .set({
-          "participants": [currentUid, chatUser.id],
-          "updatedAt": FieldValue.serverTimestamp(),
-          "lastMsg": type == MessageType.image ? "📸 Image" : msg,
-          "lastType": type.name,
-        }, SetOptions(merge: true));
+      final String currentUid = user.uid;
+      final cid = getConversationID(chatUser.id);
+      final timeId = DateTime.now().millisecondsSinceEpoch.toString();
 
-    // Write message
-    await FirebaseFirestore.instance
-        .collection(MyKeys.chatCollection)
-        .doc(cid)
-        .collection(MyKeys.messageCollection)
-        .doc(timeId)
-        .set({
-          'toId': chatUser.id,
-          'fromId': currentUid,
-          'msg': msg,
-          'read': '',
-          'type': type.name,
-          'sent': FieldValue.serverTimestamp(),
-          'senderName': senderName,
-        });
+      //  safe senderName
+      String senderName = "Someone";
+      try {
+        final n = (Messagerepository.me.username).toString().trim();
+        if (n.isNotEmpty) senderName = n;
+      } catch (_) {
+        final n = (user.displayName ?? user.phoneNumber ?? "").trim();
+        if (n.isNotEmpty) senderName = n;
+      }
 
-    // restore chat for receiver
-    await FirebaseFirestore.instance
-        .collection(MyKeys.userCollection)
-        .doc(chatUser.id)
-        .collection('deleted_chats')
-        .doc(currentUid)
-        .delete()
-        .catchError((_) {});
+      await FirebaseFirestore.instance
+          .collection(MyKeys.chatCollection)
+          .doc(cid)
+          .set({
+            "participants": [currentUid, chatUser.id],
+            "updatedAt": FieldValue.serverTimestamp(),
+            "lastMsg": type == MessageType.image ? "📸 Photo" : msg,
+            "lastType": type.name,
+          }, SetOptions(merge: true));
 
-    // restore chat for sender
-    await FirebaseFirestore.instance
-        .collection(MyKeys.userCollection)
-        .doc(currentUid)
-        .collection('deleted_chats')
-        .doc(chatUser.id)
-        .delete()
-        .catchError((_) {});
+      await FirebaseFirestore.instance
+          .collection(MyKeys.chatCollection)
+          .doc(cid)
+          .collection(MyKeys.messageCollection)
+          .doc(timeId)
+          .set({
+            'toId': chatUser.id,
+            'fromId': currentUid,
+            'msg': msg,
+            'read': '',
+            'type': type.name,
+            'sent': FieldValue.serverTimestamp(),
+            'senderName': senderName,
+          });
+
+      // restore chat for receiver
+      await FirebaseFirestore.instance
+          .collection(MyKeys.userCollection)
+          .doc(chatUser.id)
+          .collection('deleted_chats')
+          .doc(currentUid)
+          .delete()
+          .catchError((_) {});
+
+      // restore chat for sender
+      await FirebaseFirestore.instance
+          .collection(MyKeys.userCollection)
+          .doc(currentUid)
+          .collection('deleted_chats')
+          .doc(chatUser.id)
+          .delete()
+          .catchError((_) {});
+    } catch (e) {
+      debugPrint("❌ sendMessage crash: $e");
+    }
   }
 
   // getFormattedTime

@@ -22,11 +22,14 @@
 <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT"/>
 
 <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY"/>
+
+
 <!--for bring app to foreground from background in Android 10 -->
 <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
     android:maxSdkVersion="32"/>
 <uses-permission android:name="android.permission.READ_CONTACTS"/>
+
 
 
 
@@ -61,10 +64,13 @@
             android:name="flutterEmbedding"
             android:value="2" />
 
-            <meta-data
+            <!-- <meta-data
     android:name="com.google.firebase.messaging.default_notification_channel_id"
-    android:value="chat_channel_id" />
-
+    android:value="chat_channel_id" /> -->
+    <meta-data
+    android:name="com.google.firebase.messaging.default_notification_channel_id"
+    android:value="comms_channel_id" />
+    
     </application>
 
     <queries>
