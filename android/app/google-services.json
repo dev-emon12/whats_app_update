@@ -12,7 +12,16 @@
           "package_name": "com.example.whats_app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "926145638925-u0d3g2vlfgbvt1rvfpgqfbe92eftc3qa.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.whats_app",
+            "certificate_hash": "19218310e387f04df9fe1bd8be8b91bc060a409c"
+          }
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyAN06fnNMJ6tE8nchLJrwNQRN41SXv2sAs"

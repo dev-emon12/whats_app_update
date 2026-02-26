@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
 import 'package:whats_app/data/repository/user/UserRepository.dart';
+import 'package:whats_app/feature/Chatting_screen/chatting_screen.dart';
 import 'package:whats_app/feature/authentication/Model/UserModel.dart';
 import 'package:whats_app/utiles/const/keys.dart';
 
@@ -77,6 +78,7 @@ class ChatListController extends GetxController {
     }
   }
 
+  // get chat user id
   static Stream<List<String>> getMyChatUserIds(String myId) {
     return FirebaseFirestore.instance
         .collection(MyKeys.chatCollection)

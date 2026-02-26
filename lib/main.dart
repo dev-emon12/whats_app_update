@@ -61,7 +61,7 @@ Future<void> main() async {
   // notificaiton background handeler
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
-  // controllers/repository
+  // controllers/repositorys
   Get.put(AuthenticationRepository(), permanent: true);
   Get.put(UserController(), permanent: true);
   Get.put(AppLifecycleService(), permanent: true);
@@ -70,7 +70,7 @@ Future<void> main() async {
   // notifications
   await NotificationService.instance.init(navigatorKey: navigatorKey);
 
-  // ONE auth listener
+  // auth listener
   _authSub = FirebaseAuth.instance.authStateChanges().listen((
     User? user,
   ) async {

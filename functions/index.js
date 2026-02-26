@@ -50,7 +50,7 @@ exports.onNewChatMessage = functions.firestore
   exports.onIncomingCall = functions.firestore
   .document("calls/{docId}")
   .onCreate(async (snap, context) => {
-    const call = snap.data();
+    const call = snap.data();  
     if (!call) return null;
 
     const callDocId = context.params.docId;
@@ -61,7 +61,7 @@ exports.onNewChatMessage = functions.firestore
     const callType = String(call.callType || "audio");
 
     const participants = Array.isArray(call.participants) ? call.participants : [];
-    // receivers = everyone except caller
+    
     const receivers = participants.filter((id) => String(id) !== callerId);
 
     if (!callerId || receivers.length === 0) return null;
@@ -86,7 +86,7 @@ exports.onNewChatMessage = functions.firestore
           callerPhone: callerPhone,
         },
         android: { priority: "high" },
-      });
+      }); 
     }
 
     return null;
